@@ -1,0 +1,9 @@
+On va analyser en fonction de l'age :  
+    - analyse par lieu :
+        - département puis agglomération
+
+    - analyse par période : 
+        - mois/saison puis moment dans la journée
+
+    - analyse par genre : 
+        - tester le genre en fonction du lieu (agglo pas agglo), de l'heure (journée/nuit) et de l'age (18/25)
