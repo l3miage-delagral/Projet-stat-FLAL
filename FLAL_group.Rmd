@@ -20,7 +20,7 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r}
 ## import des données
 
-caracteristiques_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/carcteristiques-2021.csv", sep=";", encoding = "UTF-8")
+caracteristiques_2021 <- read.csv("data/carcteristiques-2021.csv", sep=";", encoding = "UTF-8")
 
 caracteristiques_2021$Num_Acc <- as.character(caracteristiques_2021$Num_Acc)
 
@@ -28,7 +28,7 @@ caracteristiques_2021$Num_Acc <- as.character(caracteristiques_2021$Num_Acc)
 
 
 
-usagers_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/usagers-2021.csv", sep=";", encoding = "UTF-8")
+usagers_2021 <- read.csv("data/usagers-2021.csv", sep=";", encoding = "UTF-8")
 
 usagers_2021$Num_Acc <- as.character(usagers_2021$Num_Acc)
 ## filter pour enlever les données non renseignées
@@ -37,14 +37,14 @@ usagers_2021 <- usagers_2021 %>% filter(usagers_2021$grav != -1)
 
 
 
-vehicules_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/vehicules-2021.csv", sep=";", encoding = "UTF-8")
+vehicules_2021 <- read.csv("data/vehicules-2021.csv", sep=";", encoding = "UTF-8")
 
 vehicules_2021$Num_Acc <- as.character(vehicules_2021$Num_Acc)
 
 
 
 
-lieux_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/lieux-2021.csv", sep=";", encoding = "UTF-8")
+lieux_2021 <- read.csv("data/lieux-2021.csv", sep=";", encoding = "UTF-8")
 
 lieux_2021$Num_Acc <- as.character(lieux_2021$Num_Acc)
 ```
@@ -84,7 +84,7 @@ table(usagers_2021$sexe)
 
 # plot des conducteurs/trices impliqués dans un accident par sexe en 2021
 plot_sexe <- usagers_2021 %>% group_by(sexe) %>% filter(place == 1) %>% summarize("count" = n())
-plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
-ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
+#plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
+#ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
 
 ```
