@@ -1,7 +1,9 @@
 ---
 title: "Accidents de la route"
-output: html_document
-date: '2023-03-07'
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
 ---
 
 ```{r setup, include=FALSE}
