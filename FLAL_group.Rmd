@@ -1,0 +1,90 @@
+---
+title: "Accidents de la route"
+output: html_document
+date: '2023-03-07'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+## import des données
+
+caracteristiques_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/carcteristiques-2021.csv", sep=";", encoding = "UTF-8")
+
+caracteristiques_2021$Num_Acc <- as.character(caracteristiques_2021$Num_Acc)
+
+
+
+
+
+usagers_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/usagers-2021.csv", sep=";", encoding = "UTF-8")
+
+usagers_2021$Num_Acc <- as.character(usagers_2021$Num_Acc)
+## filter pour enlever les données non renseignées
+usagers_2021 <- usagers_2021 %>% filter(usagers_2021$grav != -1)
+
+
+
+
+vehicules_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/vehicules-2021.csv", sep=";", encoding = "UTF-8")
+
+vehicules_2021$Num_Acc <- as.character(vehicules_2021$Num_Acc)
+
+
+
+
+lieux_2021 <- read.csv("C:/Users/alexd/OneDrive/Bureau/L3 miage/S6/ModelStat/Projet R/data/lieux-2021.csv", sep=";", encoding = "UTF-8")
+
+lieux_2021$Num_Acc <- as.character(lieux_2021$Num_Acc)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+## Plots sur vehicule
+# summary
+summary(vehicules_2021)
+
+
+# accidents en fonction du type de véhicule
+plot_vehicule <- vehicules_2021 %>% group_by(vehicules_2021$catv) %>% summarize("count" = n()) %>% filter(count > 500 & count < 50000)
+
+ggplot(data = plot_vehicule, aes(x=`vehicules_2021$catv`, y=count)) +
+  geom_bar(stat="identity")
+
+```
+
+```{r}
+## Plots sur les usagers
+
+# accidents par année de naissance en 2021
+plot_usagers <- usagers_2021 %>% group_by(usagers_2021$an_nais) %>% summarize("count" = n())
+
+ggplot(data = plot_usagers, aes(x=`usagers_2021$an_nais`, y=count)) +
+  geom_bar(stat="identity");
+
+## par age ca serait pas mal
+
+## par sexe
+# Nombre de personne touchées par les accidents par sexe en 2021
+table(usagers_2021$sexe)
+
+# plot des conducteurs/trices impliqués dans un accident par sexe en 2021
+plot_sexe <- usagers_2021 %>% group_by(sexe) %>% filter(place == 1) %>% summarize("count" = n())
+plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
+ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
+
+```
