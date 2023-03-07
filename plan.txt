@@ -1,0 +1,14 @@
+            Guidelines
+Justify the data set selection and described it
+Formulate three questions about the selected data set
+Discuss with the professors and choose one question among these
+Propose a methodology to answer that question
+Implement this methodology using Literate Programming
+The report must be acessible online (in your git repository)
+
+            Rapport
+Ecrire le rapport avec Rstudio (cf Report sur Gitlab)
+Rendre deux fichiers (*.Rmd) et (*.pdf or *.html).
+
+            Presentation
+Preparer un support pour la presentation
