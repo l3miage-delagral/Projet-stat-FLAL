@@ -1,17 +1,10 @@
-            Guidelines
-Justify the data set selection and described it
-Formulate three questions about the selected data set
-Discuss with the professors and choose one question among these
-Propose a methodology to answer that question
-Implement this methodology using Literate Programming
-The report must be acessible online (in your git repository)
+*--> decrire l'etat de la tache ou la reponse a la tache*
 
-            Rapport
-Ecrire le rapport avec Rstudio (cf Report sur Gitlab)
-Rendre deux fichiers (*.Rmd) et (*.pdf or *.html).
-
-            Presentation
-Preparer un support pour la presentation
+                Guidelines
+- Justify the data set selection and described it
+--> Nous avons choisi un jeu de données sur les accidents de voiture en france 
+en specifiant des infos sur les conducteurs, les vehicules, le lieu et la cause, tout ça entre 2005 et 2021
+on a choisi de regarder que les donnees de 2021 parce qu'il y a suffisemment de donnees.
 
 On va analyser en fonction de l'age :  
     - analyse par lieu :
@@ -19,4 +12,33 @@ On va analyser en fonction de l'age :
     - analyse par période : 
         - mois/saison puis moment dans la journée
     - analyse par genre : 
-        - tester le genre en fonction du lieu (agglo pas agglo), de l'heure (journée/nuit) et de l'age (18/25)
+    - tester le genre en fonction du lieu (agglo pas agglo), de l'heure (journée/nuit) et de l'age (18/25)
+
+- Choose a question about the selected data set
+--> variable de reponse = gravite
+comment depend cette variable des autres variables etudiees.
+
+- Propose a methodology to answer that question
+--> diagramme en arete de poisson (suggested by prof)
+    aa kel main khatt les facteurs possible
+    meshen nnaee ayya aktar facteur aw shi hek
+
+    gravite = etat usager et etat vehicule et nb de ces 2
+    check en fonction de lieu date moment etc
+
+- Implement this methodology using Literate Programming
+--> I AM HERE
+
+- The report must be acessible online (in your git repository)
+-->
+
+                Rapport
+- Ecrire le rapport avec Rstudio (cf Report sur Gitlab)
+-->
+
+- Rendre deux fichiers (*.Rmd) et (*.html)
+-->
+
+                Presentation
+- Preparer un support pour la presentation
+-->
