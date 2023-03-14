@@ -5,7 +5,7 @@
 --> Nous avons choisi un jeu de données sur les accidents de voiture en france 
 en specifiant des infos sur les conducteurs, les vehicules, le lieu et la cause, tout ça entre 2005 et 2021
 on a choisi de regarder que les donnees de 2021 parce qu'il y a suffisemment de donnees.
-on a enlevé int de caracteristique, adr, annee,
+on a enlevé int de caracteristique, adr, annee, etc.. ma elon aaze
 
 On va analyser en fonction de l'age :  
     - analyse par lieu :
