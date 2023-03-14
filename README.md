@@ -9,6 +9,8 @@
   - vehicules-2021.csv
   
   
+  Pb : Expliquer la gravité des accidents
+
   Notre Plan : 
   
   - Etude univariée sur les accidents de manière globale (étude chronologique sur l'année)
