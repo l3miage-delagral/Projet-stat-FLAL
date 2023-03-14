@@ -32,5 +32,5 @@
           - le nb et la gravité en fonction de l'âge
       
     - Pour les véhicules : 
-          - pour 
+          - on regarde la gravité en fonction du type de véhicule (deux roues, voitures classiques etc...)
 
