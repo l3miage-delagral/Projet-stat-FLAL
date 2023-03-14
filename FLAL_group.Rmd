@@ -52,6 +52,25 @@ lieux_2021 <- read.csv("data/lieux-2021.csv", sep=";", encoding = "UTF-8")
 lieux_2021$Num_Acc <- as.character(lieux_2021$Num_Acc)
 ```
 
+## Fusion
+
+```{r}
+## fusion du jeu de données global
+tmp <- merge(caracteristiques_2021, usagers_2021, by ="Num_Acc")
+tmp1 <- merge(tmp, vehicules_2021, by="Num_Acc")
+data <- merge(tmp1, lieux_2021, by="Num_Acc")
+rm(tmp, tmp1)
+```
+
+
+```{r}
+## preparation des données (on supprime ce qui nous interesse pas)
+data <- data %>% select(-an)
+```
+
+
+
+
 ## Including Plots
 
 You can also embed plots, for example:
