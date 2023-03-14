@@ -33,4 +33,12 @@
       
     - Pour les véhicules : 
           - on regarde la gravité en fonction du type de véhicule (deux roues, voitures classiques etc...)
+          - On regarde la gravité en fonction de la sécurité installée pour l'usager (ceinture airbag pour les voitures, casque gant veste pour les motards)
+
+    - Pour l'environnement : 
+          - On regarde la gravité en fonction de la vitesse autorisée (en agglo (50km/h)n etc...)
+          - On regarde le nb et la gravité en fonction de l'état de la route (mouillée, eneigée, sèche)
+          - On regarde le nb et la gravité en fonction de l'éclairage de la route (nuit noire, jour, éclairage urbain etc...)
+
+
 
