@@ -7,6 +7,9 @@ output:
     
 ---
 
+##### Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(readxl)
@@ -14,13 +17,7 @@ library(tidyverse)
 library(ggplot2)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r}
+```{r include=FALSE}
 ## import des données
 
 caracteristiques_2021 <- read.csv("data/carcteristiques-2021.csv", sep=";", encoding = "UTF-8")
@@ -52,45 +49,45 @@ lieux_2021 <- read.csv("data/lieux-2021.csv", sep=";", encoding = "UTF-8")
 lieux_2021$Num_Acc <- as.character(lieux_2021$Num_Acc)
 ```
 
-## Fusion
-
-```{r}
+```{r include=FALSE}
 ## fusion du jeu de données global
-tmp <- merge(caracteristiques_2021, usagers_2021, by ="Num_Acc")
-tmp1 <- merge(tmp, vehicules_2021, by="Num_Acc")
-data <- merge(tmp1, lieux_2021, by="Num_Acc")
+tmp <- merge(caracteristiques_2021, lieux_2021, by ="Num_Acc")
+tmp1 <- merge(usagers_2021, vehicules_2021, by=c("Num_Acc", "id_vehicule", "num_veh"))
+data <- merge(tmp1, tmp, by="Num_Acc")
 rm(tmp, tmp1)
 ```
 
 
-```{r}
+```{r include=FALSE}
 ## preparation des données (on supprime ce qui nous interesse pas)
-data <- data %>% select(-an)
+## unité : une personne
+## population : les accidents en France en 2021
+## ajouter une colonne calculée pour l'age
+## catégorie catv à réduire / regrouper
+data <- data %>% select(-an, -int, -adr, -locp, -actp, -etatp, -senc, -obs, -choc, -manv, -motor, -occutc, -catr, -voie, -v1, -v2, -circ, -nbv, -vosp, -prof, -pr, -pr1, -plan, -lartpc, -larrout, -surf, -infra, -situ, -atm)
 ```
 
 
 
 
-## Including Plots
-
-You can also embed plots, for example:
+## Etude globale sur les accidents
 
 ```{r pressure, echo=FALSE}
-## Plots sur vehicule
-# summary
-summary(vehicules_2021)
 
 
-# accidents en fonction du type de véhicule
-plot_vehicule <- vehicules_2021 %>% group_by(vehicules_2021$catv) %>% summarize("count" = n()) %>% filter(count > 500 & count < 50000)
+# accidents par année de naissance en 2021
+plot_acc <- data %>% group_by(data$Num_Acc, data$mois) %>% summarize("count" = n())
 
-ggplot(data = plot_vehicule, aes(x=`vehicules_2021$catv`, y=count)) +
-  geom_bar(stat="identity")
+ggplot(data = plot_acc, aes(x=`data$mois`, y=count, fill=`data$mois`)) +
+  geom_bar(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
 
+rm(plot_acc)
 ```
 
-```{r}
-## Plots sur les usagers
+## Tests plots sur les usagers (à revoir)
+
+```{r echo=FALSE}
+
 
 # accidents par année de naissance en 2021
 plot_usagers <- usagers_2021 %>% group_by(usagers_2021$an_nais) %>% summarize("count" = n())
