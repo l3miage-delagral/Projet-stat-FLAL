@@ -65,6 +65,15 @@ data <- data %>% select(-an, -int, -adr, -locp, -actp, -etatp, -senc, -obs, -cho
 ```
 
 
+```{r include=FALSE}
+## Champs calculé
+age <- data.frame(2021 - data$an_nais)
+data <- cbind(data, age)
+colnames(data)[26] <- "age"
+```
+
+
+
 ## Etude globale sur les accidents
 
 ```{r pressure, echo=FALSE}
@@ -82,13 +91,15 @@ rm(plot_acc)
 
 ## Tests plots sur les usagers (à revoir)
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 
-age <- data.frame(2021 - data$an_nais)
+## remettre dans l'ordre les chiffres de grav
+
+
 # accidents par année de naissance en 2021
-plot_usagers <- usagers_2021 %>% group_by(usagers_2021$an_nais) %>% summarize("count" = n())
+plot_usagers <- data %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 
-ggplot(data = plot_usagers, aes(x=`usagers_2021$an_nais`, y=count)) +
+ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
   geom_bar(stat="identity");
 
 ## par age ca serait pas mal
