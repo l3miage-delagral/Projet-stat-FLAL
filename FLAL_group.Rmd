@@ -106,4 +106,5 @@ plot_sexe <- usagers_2021 %>% group_by(sexe) %>% filter(place == 1) %>% summariz
 #plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
 #ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
 
+rm(plot_usagers, plot_sexe)
 ```
