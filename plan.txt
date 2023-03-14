@@ -5,6 +5,7 @@
 --> Nous avons choisi un jeu de données sur les accidents de voiture en france 
 en specifiant des infos sur les conducteurs, les vehicules, le lieu et la cause, tout ça entre 2005 et 2021
 on a choisi de regarder que les donnees de 2021 parce qu'il y a suffisemment de donnees.
+on a enlevé int de caracteristique, adr, annee,
 
 On va analyser en fonction de l'age :  
     - analyse par lieu :
@@ -27,7 +28,9 @@ comment depend cette variable des autres variables etudiees.
     check en fonction de lieu date moment etc
 
 - Implement this methodology using Literate Programming
---> I AM HERE
+--> (explanation of the program logic in a natural language 
+interspersed with snippets of macros and traditional source code) 
+I AM HERE
 
 - The report must be acessible online (in your git repository)
 -->
