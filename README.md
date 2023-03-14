@@ -17,3 +17,18 @@
             - Les usagers (age, sexe)
             - vehicule (categorie de vehicule)
             - environnement (vitesse autorisée , agglo ou pas, éclairage, le temps)
+
+
+  Détails : 
+    - Pour les lieux :
+          - on regarde d'abord le nb d'accident par departement puis la gravité en fonction de agglo ou pas
+          - on peut essayer de faire une carte
+
+
+    - Pour les usagers : 
+          - on regade nb d'accidents en fonction du sexe (pour garder l'esprit féministe)
+          - le nb et la gravité en fonction de l'âge
+      
+    - Pour les véhicules : 
+          - pour 
+
