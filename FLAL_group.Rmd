@@ -65,8 +65,6 @@ data <- data %>% select(-an, -int, -adr, -locp, -actp, -etatp, -senc, -obs, -cho
 ```
 
 
-
-
 ## Etude globale sur les accidents
 
 ```{r pressure, echo=FALSE}
@@ -81,11 +79,12 @@ ggplot(data = plot_acc, aes(x=`data$mois`, y=count, fill=`data$mois`)) +
 rm(plot_acc)
 ```
 
+
 ## Tests plots sur les usagers (à revoir)
 
 ```{r echo=FALSE}
 
-
+age <- data.frame(2021 - data$an_nais)
 # accidents par année de naissance en 2021
 plot_usagers <- usagers_2021 %>% group_by(usagers_2021$an_nais) %>% summarize("count" = n())
 
