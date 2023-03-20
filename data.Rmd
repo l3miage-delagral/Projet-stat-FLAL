@@ -1,0 +1,52 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r include=FALSE}
+## import des données
+caracteristiques_2021 <- read.csv("data/carcteristiques-2021.csv", sep=";", encoding = "UTF-8")
+caracteristiques_2021$Num_Acc <- as.character(caracteristiques_2021$Num_Acc)
+usagers_2021 <- read.csv("data/usagers-2021.csv", sep=";", encoding = "UTF-8")
+usagers_2021$Num_Acc <- as.character(usagers_2021$Num_Acc)
+## filter pour enlever les données non renseignées
+usagers_2021 <- usagers_2021 %>% filter(usagers_2021$grav != -1)
+vehicules_2021 <- read.csv("data/vehicules-2021.csv", sep=";", encoding = "UTF-8")
+vehicules_2021$Num_Acc <- as.character(vehicules_2021$Num_Acc)
+lieux_2021 <- read.csv("data/lieux-2021.csv", sep=";", encoding = "UTF-8")
+lieux_2021$Num_Acc <- as.character(lieux_2021$Num_Acc)
+```
+
+```{r include=FALSE}
+## fusion du jeu de données global
+tmp <- merge(caracteristiques_2021, lieux_2021, by ="Num_Acc")
+tmp1 <- merge(usagers_2021, vehicules_2021, by=c("Num_Acc", "id_vehicule", "num_veh"))
+data <- merge(tmp1, tmp, by="Num_Acc")
+rm(tmp, tmp1)
+```
+
+
+```{r include=FALSE}
+## preparation des données (on supprime ce qui nous interesse pas)
+## unité : une personne
+## population : les accidents en France en 2021
+## ajouter une colonne calculée pour l'age
+## catégorie catv à réduire / regrouper
+data <- data %>% select(-an, -int, -adr, -locp, -actp, -etatp, -senc, -obs, -choc, -manv, -motor, -occutc, -catr, -voie, -v1, -v2, -circ, -nbv, -vosp, -prof, -pr, -pr1, -plan, -lartpc, -larrout, -surf, -infra, -situ, -atm)
+```
+
+
+```{r include=FALSE}
+## Champs calculé
+age <- data.frame(2021 - data$an_nais)
+data <- cbind(data, age)
+colnames(data)[26] <- "age"
+```
+
+```{r}
+## création du fichier excel 
+write.csv2(data, file="data/data.csv", row.names = FALSE)
+```
+
