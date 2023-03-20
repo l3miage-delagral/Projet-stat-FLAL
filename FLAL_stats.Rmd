@@ -1,0 +1,88 @@
+---
+title: "Analyse des accidents de la route pendant l'année 2021 en fonction du lieu, de la période, de l'age et du sexe"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    
+---
+
+##### Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+library(leaflet)
+```
+
+
+```{r include=FALSE}
+df <- read_delim("data/data.csv", delim = ";", 
+    escape_double = FALSE, col_types = cols(Num_Acc = col_character(), 
+        id_vehicule = col_character(), hrmn = col_time(format = "%H:%M"), 
+        lat = col_character()), trim_ws = TRUE)
+
+# ajustement sur les données
+
+# long et lat as numeric
+df$lat <- sub(",", ".", df$lat)
+df$long <- sub(",", ".", df$long)
+df$lat <- as.numeric(df$lat)
+df$long <- as.numeric(df$long)
+
+# charcter bizarre dans id_vehicule
+df$id_vehicule <- sub("�", "", df$id_vehicule)
+df$id_vehicule <- as.character(df$id_vehicule)
+```
+
+
+## Etude globale sur les accidents
+
+```{r pressure, echo=FALSE}
+# accidents par année de naissance en 2021
+plot_acc <- df %>% group_by(df$Num_Acc, df$mois) %>% summarize("count" = n())
+ggplot(data = plot_acc, aes(x=`df$mois`, y=count, fill=`df$mois`)) +
+  geom_bar(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
+rm(plot_acc)
+```
+
+
+## Tests plots sur les usagers (à revoir)
+
+```{r echo=FALSE, warning=FALSE}
+## remettre dans l'ordre les chiffres de grav
+# accidents par année de naissance en 2021
+plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
+ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
+  geom_bar(stat="identity");
+## par age ca serait pas mal
+## par sexe
+# Nombre de personne touchées par les accidents par sexe en 2021
+table(df$sexe)
+# plot des conducteurs/trices impliqués dans un accident par sexe en 2021
+plot_sexe <- df %>% group_by(sexe) %>% filter(place == 1) %>% summarize("count" = n())
+#plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
+#ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
+rm(plot_usagers, plot_sexe)
+```
+
+```{r}
+## map des accidents
+library(maps)
+
+df_carte <- data.frame(x = state.center$x, y = state.center$y,
+                 state = state.name)
+
+p <- ggplot(df_carte, aes(x = x, y = y)) + 
+       geom_polygon(data = map_data("france"),
+                    color = "white",
+                    aes(x = long, y = lat,
+                        fill = map_data("france")$region,
+                        group = group)) +
+       guides(fill = FALSE)
+p
+```
+
