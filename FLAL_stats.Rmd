@@ -1,10 +1,13 @@
 ---
-title: "Analyse des accidents de la route pendant l'année 2021 en fonction du lieu, de la période, de l'age et du sexe"
+title: Analyse des accidents de la route pendant l'année 2021 en fonction du lieu,
+  de la période, de l'age et du sexe
 output:
   html_document:
-    toc: true
+    toc: yes
     toc_depth: 2
-    
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ##### Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine
@@ -20,6 +23,7 @@ library(maps)
 library(sf)
 ```
 
+Dans ce rapport, nous cherchons à expliquer la gravité des accidents en France en 2021
 
 ```{r include=FALSE}
 df <- read_delim("data/data.csv", delim = ";", 
@@ -48,18 +52,24 @@ df$id_vehicule <- as.character(df$id_vehicule)
 
 ## Etude globale sur les accidents
 
-```{r pressure, echo=FALSE}
+```{r pressure, echo=FALSE, warning=FALSE}
 # accidents par année de naissance en 2021
 plot_acc <- df %>% group_by(df$Num_Acc, df$mois) %>% summarize("count" = n())
-ggplot(data = plot_acc, aes(x=`df$mois`, y=count, fill=`df$mois`)) +
-  geom_bar(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
+
+plot_acc <- case_when(
+  data$dep %in% c("01") ~ ""
+)
+  
+plot_acc$`df$mois`<- as.character(plot_acc$`df$mois`)
+ggplot(data = plot_acc, aes(x=`df$mois`, y=count, fill="orange")) +
+  geom_col(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
 rm(plot_acc)
 ```
 
 
-## Tests plots sur les usagers (à revoir)
+## Tests plots sur les usagers
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ## remettre dans l'ordre les chiffres de grav
 # accidents par année de naissance en 2021
 plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
@@ -76,7 +86,7 @@ plot_sexe <- df %>% group_by(sexe) %>% filter(place == 1) %>% summarize("count" 
 rm(plot_usagers, plot_sexe)
 ```
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 # Importer les données géographiques
 regions_geojson <- st_read("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions-version-simplifiee.geojson")
 
@@ -95,4 +105,19 @@ ggplot() +
   ggtitle("Nombre d'accidents par région en France en 2021") +
   theme_void()
 ```
+
+
+## Est ce que les usagers influencent la gravité des accidents ?
+- Pour les usagers : 
+      - on regade nb d'accidents en fonction du sexe (pour garder l'esprit féministe)
+      - le nb et la gravité en fonction de l'âge
+  
+- Pour les véhicules : 
+      - on regarde la gravité en fonction du type de véhicule (deux roues, voitures classiques etc...)
+      - On regarde la gravité en fonction de la sécurité installée pour l'usager (ceinture airbag pour les voitures, casque gant veste pour les motards)
+
+- Pour l'environnement : 
+      - On regarde la gravité en fonction de la vitesse autorisée (en agglo (50km/h)n etc...)
+      - On regarde le nb et la gravité en fonction de l'état de la route (mouillée, eneigée, sèche)
+      - On regarde le nb et la gravité en fonction de l'éclairage de la route (nuit noire, jour, éclairage urbain etc...)
 
