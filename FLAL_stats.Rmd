@@ -21,6 +21,7 @@ library(ggplot2)
 library(leaflet)
 library(maps)
 library(sf)
+library(dplyr)
 ```
 
 Dans ce rapport, nous cherchons à expliquer la gravité des accidents en France en 2021
@@ -56,12 +57,19 @@ df$id_vehicule <- as.character(df$id_vehicule)
 # accidents par année de naissance en 2021
 plot_acc <- df %>% group_by(df$Num_Acc, df$mois) %>% summarize("count" = n())
 
-plot_acc <- case_when(
-  data$dep %in% c("01") ~ ""
-)
-  
+
+# mois nom
+noms_mois <- c("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre")
+
+nom_mois <- function(numero) {
+  return(noms_mois[numero])
+}
+
+plot_acc$nom_mois <- sapply(plot_acc$`df$mois`, nom_mois)
+
+# plot
 plot_acc$`df$mois`<- as.character(plot_acc$`df$mois`)
-ggplot(data = plot_acc, aes(x=`df$mois`, y=count, fill="orange")) +
+ggplot(data = plot_acc, aes(x=nom_mois, y=count, fill="orange")) +
   geom_col(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
 rm(plot_acc)
 ```
