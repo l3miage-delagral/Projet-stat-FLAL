@@ -43,6 +43,26 @@ data <- data %>% select(-an, -int, -adr, -locp, -actp, -etatp, -senc, -obs, -cho
 age <- data.frame(2021 - data$an_nais)
 data <- cbind(data, age)
 colnames(data)[26] <- "age"
+
+## les régions
+data$region <- case_when(
+  data$dep %in% c("01", "03", "07", "15", "26", "38", "42", "43", "63", "69", "73", "74") ~ "Auvergne-Rhône-Alpes",
+  data$dep %in% c("08", "10", "51", "52", "54", "55", "57", "67", "68", "88") ~ "Grand Est",
+  data$dep %in% c("18", "28", "36", "37", "41", "45") ~ "Centre-Val de Loire",
+  data$dep %in% c("21", "25", "39", "58", "70", "71", "89", "90") ~ "Bourgogne-Franche-Comté",
+  data$dep %in% c("22", "29", "35", "56") ~ "Bretagne",
+  data$dep %in% c("02", "59", "60", "62", "80") ~ "Hauts-de-France",
+  data$dep %in% c("14", "27", "50", "61", "76") ~ "Normandie",
+  data$dep %in% c("16", "17", "79", "86", "87") ~ "Nouvelle-Aquitaine",
+  data$dep %in% c("09", "11", "12", "30", "31", "32", "34", "46", "48", "65", "66", "81", "82") ~ "Occitanie",
+  data$dep %in% c("44", "49", "53", "72", "85") ~ "Pays de la Loire",
+  data$dep %in% c("75", "77", "78", "91", "92", "93", "94", "95") ~ "Île-de-France",
+  data$dep %in% c("19", "23", "24", "33", "40", "47", "64", "82") ~ "Nouvelle-Aquitaine",
+  data$dep %in% c("04", "05", "06", "13", "83", "84") ~ "Provence-Alpes-Côte d'Azur",
+  data$dep %in% c("2A", "2B") ~ "Corse",
+  TRUE ~ "Autre"
+)
+
 ```
 
 ```{r}
