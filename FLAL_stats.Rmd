@@ -16,6 +16,8 @@ library(readxl)
 library(tidyverse)
 library(ggplot2)
 library(leaflet)
+library(maps)
+library(sf)
 ```
 
 
@@ -33,8 +35,13 @@ df$long <- sub(",", ".", df$long)
 df$lat <- as.numeric(df$lat)
 df$long <- as.numeric(df$long)
 
+# magouille pour éliminer les caractères spéciaux de région
+df$region <- iconv(df$region, from = "ISO-8859-1", to = "UTF-8")
+df$region <- sub("ï¿½Ã®", "î", df$region)
+
 # charcter bizarre dans id_vehicule
-df$id_vehicule <- sub("�", "", df$id_vehicule)
+
+df$id_vehicule <- iconv(df$id_vehicule, from = "ISO-8859-1", to = "UTF-8")
 df$id_vehicule <- as.character(df$id_vehicule)
 ```
 
@@ -70,19 +77,23 @@ rm(plot_usagers, plot_sexe)
 ```
 
 ```{r}
-## map des accidents
-library(maps)
+# Importer les données géographiques
+regions_geojson <- st_read("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions-version-simplifiee.geojson")
 
-df_carte <- data.frame(x = state.center$x, y = state.center$y,
-                 state = state.name)
+# Calculer le nombre d'accidents par région
+df_region <- df %>%
+  group_by(region) %>%
+  summarise(n_accidents = n())
 
-p <- ggplot(df_carte, aes(x = x, y = y)) + 
-       geom_polygon(data = map_data("france"),
-                    color = "white",
-                    aes(x = long, y = lat,
-                        fill = map_data("france")$region,
-                        group = group)) +
-       guides(fill = FALSE)
-p
+# Fusionner les données géographiques et les données de nombre d'accidents
+map_df <- left_join(regions_geojson, df_region, by = c("nom" = "region"))
+
+# Créer la carte
+ggplot() +
+  geom_sf(data = map_df, aes(fill = n_accidents)) +
+  scale_fill_gradient(low = "lightyellow", high = "darkorange") +
+  ggtitle("Nombre d'accidents par région en France en 2021") +
+  theme_void()
+
 ```
 
