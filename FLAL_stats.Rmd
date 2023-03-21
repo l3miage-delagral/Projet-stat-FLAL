@@ -7,7 +7,7 @@ output:
     toc_depth: 2
   pdf_document:
     toc: yes
-    toc_depth: '2'
+    toc_depth: 2
 ---
 
 ##### Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine
@@ -22,6 +22,7 @@ library(leaflet)
 library(maps)
 library(sf)
 library(dplyr)
+library(lubridate)
 ```
 
 Dans ce rapport, nous cherchons à expliquer la gravité des accidents en France en 2021
@@ -54,45 +55,119 @@ df$id_vehicule <- as.character(df$id_vehicule)
 ## Etude globale sur les accidents
 
 ```{r pressure, echo=FALSE, warning=FALSE}
-# accidents par année de naissance en 2021
-plot_acc <- df %>% group_by(df$Num_Acc, df$mois) %>% summarize("count" = n())
-
+# accidents par mois en 2021
+plot_acc <- df %>% group_by(mois) %>% summarize("count" = n())
 
 # mois nom
-noms_mois <- c("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre")
+noms_mois <- c("janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc")
+mois_ordre <- factor(noms_mois, levels = noms_mois)
 
-nom_mois <- function(numero) {
-  return(noms_mois[numero])
+# fonction pour associer le numéro de mois à son nom abrégé
+nom_mois <- function(num_mois) {
+  return(noms_mois[num_mois])
 }
 
-plot_acc$nom_mois <- sapply(plot_acc$`df$mois`, nom_mois)
+plot_acc$nom_mois <- factor(sapply(plot_acc$mois, nom_mois), levels = mois_ordre)
 
 # plot
-plot_acc$`df$mois`<- as.character(plot_acc$`df$mois`)
-ggplot(data = plot_acc, aes(x=nom_mois, y=count, fill="orange")) +
-  geom_col(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
-rm(plot_acc)
+ggplot(data = plot_acc, aes(x=nom_mois, y=count)) +
+  geom_col(stat="identity", fill="darkred") +
+  ylab("nombre d'accidents") +
+  xlab("mois") +
+  ggtitle("Nombre d'accidents par mois en 2021")
+
+rm(plot_acc, noms_mois)
+```
+
+```{r echo=FALSE}
+
+# créer la colonne "heure"
+# df$heure <- hms(sprintf("%02d:%02d:00", df$hrmn %/% 100, df$hrmn %% 100))
+
+# Créer une colonne "heure_de_la_journee" contenant la tranche horaire de l'accident
+df$heure_de_la_journee <- cut(as.integer(substr(df$hrmn, 1, 2)), breaks = c(-Inf, 6, 12, 18, Inf), labels = c("Nuit", "Matin", "Après-midi", "Soir"))
+
+# Compter le nombre d'accidents par heure de la journée
+accidents_par_heure <- df %>% 
+  group_by(heure_de_la_journee) %>% 
+  summarise(nombre_accidents = n()) %>% 
+  arrange(heure_de_la_journee)
+
+# Visualiser le nombre d'accidents par heure de la journée
+ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  xlab("Heure de la journée") +
+  ylab("Nombre d'accidents") +
+  ggtitle("Nombre d'accidents par heure de la journée en 2021")
+
 ```
 
 
-## Tests plots sur les usagers
+
+## Est ce que les usagers influencent la gravité des accidents ?
+
+# Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident
+
+```{r}
+# Sous-ensemble de données contenant l'âge et le nombre d'accidents pour chaque âge
+sub_df <- df %>% 
+  group_by(age) %>% 
+  summarise(nombre_accidents = n()) %>% 
+  filter(!is.na(age))
+
+# Créer un boxplot avec le nombre d'accidents sur l'axe x et l'âge sur l'axe y
+ggplot(sub_df, aes(x = nombre_accidents, y = age)) +
+  geom_boxplot() +
+  ylab("Âge du conducteur") +
+  xlab("Nombre d'accidents") +
+  coord_flip()
+
+# Afficher les statistiques du boxplot
+print(boxplot.stats(sub_df$age))
+
+
+```
+
+Sur 126086 accidents de la route en 2021, 50 % des personnes impliquées ont moins de 51.5 ans. 50 % d'entre eux ont entre 25 et 77.5 ans.
+
+
+Dans ce cas, l'intervalle de confiance est [43.44, 59.56], ce qui signifie que l'on peut être raisonnablement sûr que la moyenne de l'âge dans la population dont l'échantillon a été prélevé se trouve dans cette plage avec une probabilité de 95%.
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ## remettre dans l'ordre les chiffres de grav
 # accidents par année de naissance en 2021
 plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
-  geom_bar(stat="identity");
-## par age ca serait pas mal
-## par sexe
-# Nombre de personne touchées par les accidents par sexe en 2021
-table(df$sexe)
-# plot des conducteurs/trices impliqués dans un accident par sexe en 2021
-plot_sexe <- df %>% group_by(sexe) %>% filter(place == 1) %>% summarize("count" = n())
-#plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
-#ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
+  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange");
+
 rm(plot_usagers, plot_sexe)
 ```
+
+```{r echo=FALSE, warning=FALSE}
+# Sous-ensemble de données contenant la gravité de l'accident et l'âge du conducteur
+sub_df <- df[, c("grav", "age")]
+
+# Supprimer les lignes où l'âge est manquant
+sub_df <- na.omit(sub_df)
+
+# Créer un graphique de densité pour la gravité de l'accident par tranche d'âge
+ggplot(sub_df, aes(x = age, fill = factor(grav))) +
+  geom_density(alpha = 0.5) +
+  xlab("Âge du conducteur") +
+  ylab("Densité") +
+  scale_fill_discrete(name = "Gravité de l'accident",
+                      labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Tué"))
+
+
+```
+De manière générale, le graphique de densité montre comment les distributions de l'âge des conducteurs diffèrent selon la gravité de l'accident. On remarque un fort pic de densité autour de 20 ans ce qui laisse penser à une forte corrélation entre l'age et la gravité de l'accident.
+
+
+
+
+## Est ce que le lieux influence les accidents ?
+
 
 ```{r echo=FALSE, warning=FALSE}
 # Importer les données géographiques
@@ -115,7 +190,7 @@ ggplot() +
 ```
 
 
-## Est ce que les usagers influencent la gravité des accidents ?
+
 - Pour les usagers : 
       - on regade nb d'accidents en fonction du sexe (pour garder l'esprit féministe)
       - le nb et la gravité en fonction de l'âge
