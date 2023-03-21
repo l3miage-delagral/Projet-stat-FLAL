@@ -94,6 +94,5 @@ ggplot() +
   scale_fill_gradient(low = "lightyellow", high = "darkorange") +
   ggtitle("Nombre d'accidents par région en France en 2021") +
   theme_void()
-
 ```
 
