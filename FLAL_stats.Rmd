@@ -92,6 +92,7 @@ map_df <- left_join(regions_geojson, df_region, by = c("nom" = "region"))
 ggplot() +
   geom_sf(data = map_df, aes(fill = n_accidents)) +
   scale_fill_gradient(low = "lightyellow", high = "darkorange") +
+  ggtitle("Nombre d'accidents par région en France en 2021") +
   theme_void()
 
 ```
