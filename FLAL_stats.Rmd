@@ -184,11 +184,30 @@ map_df <- left_join(regions_geojson, df_region, by = c("nom" = "region"))
 # Créer la carte
 ggplot() +
   geom_sf(data = map_df, aes(fill = n_accidents)) +
-  scale_fill_gradient(low = "lightyellow", high = "darkorange") +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
   ggtitle("Nombre d'accidents par région en France en 2021") +
   theme_void()
 ```
 
+```{r echo=FALSE, warning=FALSE}
+# Importer les données géographiques
+deps_geojson <- st_read("https://france-geojson.gregoiredavid.fr/repo/departements.geojson")
+
+# Calculer le nombre d'accidents par région
+df_dep <- df %>%
+  group_by(dep) %>%
+  summarise(n_accidents = n())
+
+# Fusionner les données géographiques et les données de nombre d'accidents
+map_df <- left_join(deps_geojson, df_dep, by = c("code" = "dep"))
+
+# Créer la carte
+ggplot() +
+  geom_sf(data = map_df, aes(fill = n_accidents)) +
+  scale_fill_gradient2(low = "lightyellow", mid="darkorange", high = "darkred", midpoint = 3000) +
+  ggtitle("Nombre d'accidents par département en France en 2021") +
+  theme_void()
+```
 
 
 - Pour les usagers : 
