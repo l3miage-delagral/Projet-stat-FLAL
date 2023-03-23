@@ -79,7 +79,7 @@ ggplot(data = plot_acc, aes(x=nom_mois, y=count)) +
 rm(plot_acc, noms_mois)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 
 # créer la colonne "heure"
 # df$heure <- hms(sprintf("%02d:%02d:00", df$hrmn %/% 100, df$hrmn %% 100))
@@ -108,7 +108,7 @@ ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) 
 
 # Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 # Sous-ensemble de données contenant l'âge et le nombre d'accidents pour chaque âge
 sub_df <- df %>% 
   group_by(age) %>% 
@@ -139,7 +139,7 @@ Dans ce cas, l'intervalle de confiance est [43.44, 59.56], ce qui signifie que l
 # accidents par année de naissance en 2021
 plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
-  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange");
+  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge");
 
 rm(plot_usagers, plot_sexe)
 ```
@@ -154,15 +154,114 @@ sub_df <- na.omit(sub_df)
 # Créer un graphique de densité pour la gravité de l'accident par tranche d'âge
 ggplot(sub_df, aes(x = age, fill = factor(grav))) +
   geom_density(alpha = 0.5) +
-  xlab("Âge du conducteur") +
+  xlab("Âge") +
   ylab("Densité") +
   scale_fill_discrete(name = "Gravité de l'accident",
-                      labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Tué"))
+                      labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Tué")) + ggtitle("Densité des accidents par âge des personnes touchées")
 
 
 ```
 De manière générale, le graphique de densité montre comment les distributions de l'âge des conducteurs diffèrent selon la gravité de l'accident. On remarque un fort pic de densité autour de 20 ans ce qui laisse penser à une forte corrélation entre l'age et la gravité de l'accident.
 
+
+
+```{r echo=FALSE, warning=FALSE}
+## concept de regression logistique :  il s'agit d'expliquer au mieux une variable binaire (la présence ou l'absence d'une caractéristique donnée) par des observations réelles nombreuses
+
+# Créer une variable binaire pour la gravité de l'accident (1 si l'accident est grave, 0 sinon)
+sub_df$grav_bin <- ifelse(sub_df$grav > 1, 1, 0)
+
+# Supprimer les lignes où l'âge est manquant
+sub_df <- na.omit(sub_df)
+
+# Effectuer la régression logistique
+model <- glm(grav_bin ~ age, data = sub_df, family = binomial())
+
+# Résumé de la régression logistique
+summary(model)
+
+
+##############################################################################################
+######################### Notes sur les significations des résultats #########################
+##############################################################################################
+
+# Call : indique la formule utilisée pour ajuster le modèle, les options et les données.
+# 
+# Deviance Residuals : affiche les résidus de deviance pour chaque observation. La deviance est un critère qui mesure l'ajustement du modèle aux données. Les résidus de deviance indiquent si le modèle prédit correctement la gravité de l'accident.
+# 
+# Coefficients : fournit les coefficients de régression estimés pour chaque variable d'entrée. Dans ce cas, il y a une seule variable d'entrée, l'âge. Pour chaque année d'augmentation de l'âge, la probabilité de subir un accident mortel diminue de 0,6 % (coefficient négatif). Le coefficient de l'interception indique la probabilité de subir un accident mortel pour une personne de 0 an (en pratique cela n'a pas de sens, il s'agit d'une propriété mathématique du modèle).
+# 
+# Signif. codes : indique le niveau de signification de chaque coefficient estimé. Les étoiles servent à représenter différents niveaux de significativité : *** pour un niveau très significatif, ** pour un niveau significatif, * pour un niveau de signification modéré, . pour un niveau de signification faible.
+# 
+# Dispersion parameter : fournit l'estimation de la variance de la distribution des résidus.
+# 
+# Null deviance : indique la deviance du modèle nul, c'est-à-dire un modèle qui ne contient aucune variable explicative.
+# 
+# Residual deviance : indique la deviance résiduelle du modèle, c'est-à-dire la deviance restante après avoir ajusté le modèle aux données.
+# 
+# AIC : fournit le critère d'information d'Akaike, un critère d'ajustement qui tient compte de la complexité du modèle et de l'ajustement aux données.
+# 
+# Number of Fisher Scoring iterations : indique le nombre d'itérations nécessaires pour estimer les paramètres du modèle.
+
+```
+Les résultats de la régression logistique indiquent que l'âge est significativement associé à la gravité des accidents. Plus précisément, pour une unité d'augmentation de l'âge, la log-odds d'avoir une gravité plus élevée diminue de 0,00667. Cela peut être interprété comme une diminution de la probabilité d'avoir une gravité plus élevée pour chaque année supplémentaire.
+
+Le rapport des deviances (null deviance et residual deviance) montre que le modèle ajuste bien les données, car il y a une réduction significative de la deviance résiduelle par rapport à la deviance nulle. En outre, l'AIC est relativement faible, ce qui indique que le modèle est un ajustement approprié pour les données.
+
+Le test de significativité indique que la relation entre l'âge et la gravité de l'accident est très significative (p-value < 2e-16), ce qui renforce l'idée que l'âge est un facteur important à prendre en compte dans l'évaluation de la gravité des accidents de la route.
+
+En résumé, les résultats de la régression logistique soutiennent l'idée que l'âge est significativement associé à la gravité des accidents de la route et que le modèle est un ajustement approprié pour les données.
+
+
+# Est-ce que le sexe influence la gravité des accidents ?
+
+```{r}
+sub_df <- df[, c("grav", "sexe")]
+
+# enleve les na
+sub_df <- na.omit(sub_df) %>% filter(sexe != -1)
+
+tab <- table(sub_df$sexe, sub_df$grav)
+
+# Conversion de la table croisée en un data frame
+df_s <- as.data.frame.matrix(tab)
+df_s$sexe <- rownames(df_s)
+
+# Mise en forme des données pour un diagramme en barres empilées
+df_long <- tidyr::gather(df_s, key = "grav", value = "count", -sexe)
+df_long$grav <- factor(df_long$grav, levels = c("1", "2", "3", "4"))
+df_long$sexe <- factor(df_long$sexe, levels = c("1", "2"))
+
+# Convertir la variable grav en factor avec les niveaux correspondants
+df_long$grav <- factor(df_long$grav, levels = 1:4,
+                       labels = c("Indemne", "Tué", "Blessé hospitalisé", "Blessé léger"))
+
+df_long$sexe <- factor(df_long$sexe, levels = 1:2,
+                       labels = c("Homme", "Femme"))
+
+# Définir les couleurs personnalisées
+colors <- c("Indemne" = "#00BFFF", 
+            "Blessé léger" = "#FFD700", 
+            "Blessé hospitalisé" = "#FF6347", 
+            "Tué" = "#800000")
+
+# Créer le graphique
+ggplot(df_long, aes(x = sexe, fill = grav)) +
+  geom_col(position = "dodge", aes(y = count)) +
+  scale_fill_manual(values = colors, name = "Gravité de l'accident",
+                    labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Tué")) +
+  labs(title = "Gravité des accidents par sexe", x = "Sexe", y = "Nombre d'accidents")
+
+ 
+
+```
+
+```{r}
+#test du X²
+
+chisq.test(table(sub_df$sexe, sub_df$grav))
+
+```
 
 
 
