@@ -52,7 +52,7 @@ df$id_vehicule <- as.character(df$id_vehicule)
 ```
 
 
-## Etude globale sur les accidents
+## Etude globale sur les accidents en 2021 en France
 
 ```{r pressure, echo=FALSE, warning=FALSE}
 # accidents par mois en 2021
@@ -98,7 +98,7 @@ ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) 
   geom_bar(stat = "identity", fill = "darkred") +
   xlab("Heure de la journée") +
   ylab("Nombre d'accidents") +
-  ggtitle("Nombre d'accidents par heure de la journée en 2021")
+  ggtitle("Nombre d'accidents par période de la journée en 2021")
 
 ```
 
@@ -110,7 +110,7 @@ ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) 
 
 ```{r echo=FALSE, warning=FALSE}
 # Sous-ensemble de données contenant l'âge et le nombre d'accidents pour chaque âge
-sub_df <- df %>% 
+sub_df <- df %>% filter(place == 1) %>%
   group_by(age) %>% 
   summarise(nombre_accidents = n()) %>% 
   filter(!is.na(age))
@@ -128,10 +128,10 @@ print(boxplot.stats(sub_df$age))
 
 ```
 
-Sur 126086 accidents de la route en 2021, 50 % des personnes impliquées ont moins de 51.5 ans. 50 % d'entre eux ont entre 25 et 77.5 ans.
+Sur 126086 accidents de la route en 2021, 50 % des conducteurs ont moins de 50.5 ans. 50 % d'entre eux ont entre 25.5 et 77.5 ans.
 
 
-Dans ce cas, l'intervalle de confiance est [43.44, 59.56], ce qui signifie que l'on peut être raisonnablement sûr que la moyenne de l'âge dans la population dont l'échantillon a été prélevé se trouve dans cette plage avec une probabilité de 95%.
+Dans ce cas, l'intervalle de confiance est [42.6, 58.4], ce qui signifie que l'on peut être raisonnablement sûr que la moyenne de l'âge dans la population dont l'échantillon a été prélevé se trouve dans cette plage avec une probabilité de 95%.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -139,7 +139,7 @@ Dans ce cas, l'intervalle de confiance est [43.44, 59.56], ce qui signifie que l
 # accidents par année de naissance en 2021
 plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
-  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge");
+  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge")+    theme(legend.position='none') + xlab("Âge") + ylab("Effectif")
 
 rm(plot_usagers, plot_sexe)
 ```
@@ -157,7 +157,7 @@ ggplot(sub_df, aes(x = age, fill = factor(grav))) +
   xlab("Âge") +
   ylab("Densité") +
   scale_fill_discrete(name = "Gravité de l'accident",
-                      labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Tué")) + ggtitle("Densité des accidents par âge des personnes touchées")
+                      labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Mort")) + ggtitle("Densité des accidents par âge des personnes touchées")
 
 
 ```
