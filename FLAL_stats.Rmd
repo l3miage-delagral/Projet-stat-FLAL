@@ -7,7 +7,7 @@ output:
     toc_depth: 2
   pdf_document:
     toc: yes
-    toc_depth: '2'
+    toc_depth: 2
 ---
 
 ##### Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine
@@ -22,6 +22,8 @@ library(ggplot2)
 library(leaflet)
 library(maps)
 library(sf)
+library(dplyr)
+library(lubridate)
 ```
 
 Dans ce rapport, nous cherchons à expliquer la gravité des accidents en France en 2021
@@ -51,41 +53,221 @@ df$id_vehicule <- as.character(df$id_vehicule)
 ```
 
 
-## Etude globale sur les accidents
+## Etude globale sur les accidents en 2021 en France
 
 ```{r pressure, echo=FALSE, warning=FALSE}
-# accidents par année de naissance en 2021
-plot_acc <- df %>% group_by(df$Num_Acc, df$mois) %>% summarize("count" = n())
+# accidents par mois en 2021
+plot_acc <- df %>% group_by(mois) %>% summarize("count" = n())
 
-plot_acc <- case_when(
-  data$dep %in% c("01") ~ ""
-)
-  
-plot_acc$`df$mois`<- as.character(plot_acc$`df$mois`)
-ggplot(data = plot_acc, aes(x=`df$mois`, y=count, fill="orange")) +
-  geom_col(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
-rm(plot_acc)
+# mois nom
+noms_mois <- c("janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc")
+mois_ordre <- factor(noms_mois, levels = noms_mois)
+
+# fonction pour associer le numéro de mois à son nom abrégé
+nom_mois <- function(num_mois) {
+  return(noms_mois[num_mois])
+}
+
+plot_acc$nom_mois <- factor(sapply(plot_acc$mois, nom_mois), levels = mois_ordre)
+
+# plot
+ggplot(data = plot_acc, aes(x=nom_mois, y=count)) +
+  geom_col(stat="identity", fill="darkred") +
+  ylab("nombre d'accidents") +
+  xlab("mois") +
+  ggtitle("Nombre d'accidents par mois en 2021")
+
+rm(plot_acc, noms_mois)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+# créer la colonne "heure"
+# df$heure <- hms(sprintf("%02d:%02d:00", df$hrmn %/% 100, df$hrmn %% 100))
+
+# Créer une colonne "heure_de_la_journee" contenant la tranche horaire de l'accident
+df$heure_de_la_journee <- cut(as.integer(substr(df$hrmn, 1, 2)), breaks = c(-Inf, 6, 12, 18, Inf), labels = c("Nuit", "Matin", "Après-midi", "Soir"))
+
+# Compter le nombre d'accidents par heure de la journée
+accidents_par_heure <- df %>% 
+  group_by(heure_de_la_journee) %>% 
+  summarise(nombre_accidents = n()) %>% 
+  arrange(heure_de_la_journee)
+
+# Visualiser le nombre d'accidents par heure de la journée
+ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  xlab("Heure de la journée") +
+  ylab("Nombre d'accidents") +
+  ggtitle("Nombre d'accidents par période de la journée en 2021")
+
 ```
 
 
-## Tests plots sur les usagers
+
+## Est ce que les usagers influencent la gravité des accidents ?
+
+# Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident
+
+```{r echo=FALSE, warning=FALSE}
+# Sous-ensemble de données contenant l'âge et le nombre d'accidents pour chaque âge
+sub_df <- df %>% filter(place == 1) %>%
+  group_by(age) %>% 
+  summarise(nombre_accidents = n()) %>% 
+  filter(!is.na(age))
+
+# Créer un boxplot avec le nombre d'accidents sur l'axe x et l'âge sur l'axe y
+ggplot(sub_df, aes(x = nombre_accidents, y = age)) +
+  geom_boxplot() +
+  ylab("Âge du conducteur") +
+  xlab("Nombre d'accidents") +
+  coord_flip()
+
+# Afficher les statistiques du boxplot
+print(boxplot.stats(sub_df$age))
+
+
+```
+
+Sur 126086 accidents de la route en 2021, 50 % des conducteurs ont moins de 50.5 ans. 50 % d'entre eux ont entre 25.5 et 77.5 ans.
+
+
+Dans ce cas, l'intervalle de confiance est [42.6, 58.4], ce qui signifie que l'on peut être raisonnablement sûr que la moyenne de l'âge dans la population dont l'échantillon a été prélevé se trouve dans cette plage avec une probabilité de 95%.
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ## remettre dans l'ordre les chiffres de grav
 # accidents par année de naissance en 2021
 plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
-  geom_bar(stat="identity");
-## par age ca serait pas mal
-## par sexe
-# Nombre de personne touchées par les accidents par sexe en 2021
-table(df$sexe)
-# plot des conducteurs/trices impliqués dans un accident par sexe en 2021
-plot_sexe <- df %>% group_by(sexe) %>% filter(place == 1) %>% summarize("count" = n())
-#plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
-#ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
+  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge")+    theme(legend.position='none') + xlab("Âge") + ylab("Effectif")
+
 rm(plot_usagers, plot_sexe)
 ```
+
+```{r echo=FALSE, warning=FALSE}
+# Sous-ensemble de données contenant la gravité de l'accident et l'âge du conducteur
+sub_df <- df[, c("grav", "age")]
+
+# Supprimer les lignes où l'âge est manquant
+sub_df <- na.omit(sub_df)
+
+# Créer un graphique de densité pour la gravité de l'accident par tranche d'âge
+ggplot(sub_df, aes(x = age, fill = factor(grav))) +
+  geom_density(alpha = 0.5) +
+  xlab("Âge") +
+  ylab("Densité") +
+  scale_fill_discrete(name = "Gravité de l'accident",
+                      labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Mort")) + ggtitle("Densité des accidents par âge des personnes touchées")
+
+
+```
+De manière générale, le graphique de densité montre comment les distributions de l'âge des conducteurs diffèrent selon la gravité de l'accident. On remarque un fort pic de densité autour de 20 ans ce qui laisse penser à une forte corrélation entre l'age et la gravité de l'accident.
+
+
+
+```{r echo=FALSE, warning=FALSE}
+## concept de regression logistique :  il s'agit d'expliquer au mieux une variable binaire (la présence ou l'absence d'une caractéristique donnée) par des observations réelles nombreuses
+
+# Créer une variable binaire pour la gravité de l'accident (1 si l'accident est grave, 0 sinon)
+sub_df$grav_bin <- ifelse(sub_df$grav > 1, 1, 0)
+
+# Supprimer les lignes où l'âge est manquant
+sub_df <- na.omit(sub_df)
+
+# Effectuer la régression logistique
+model <- glm(grav_bin ~ age, data = sub_df, family = binomial())
+
+# Résumé de la régression logistique
+summary(model)
+
+
+##############################################################################################
+######################### Notes sur les significations des résultats #########################
+##############################################################################################
+
+# Call : indique la formule utilisée pour ajuster le modèle, les options et les données.
+# 
+# Deviance Residuals : affiche les résidus de deviance pour chaque observation. La deviance est un critère qui mesure l'ajustement du modèle aux données. Les résidus de deviance indiquent si le modèle prédit correctement la gravité de l'accident.
+# 
+# Coefficients : fournit les coefficients de régression estimés pour chaque variable d'entrée. Dans ce cas, il y a une seule variable d'entrée, l'âge. Pour chaque année d'augmentation de l'âge, la probabilité de subir un accident mortel diminue de 0,6 % (coefficient négatif). Le coefficient de l'interception indique la probabilité de subir un accident mortel pour une personne de 0 an (en pratique cela n'a pas de sens, il s'agit d'une propriété mathématique du modèle).
+# 
+# Signif. codes : indique le niveau de signification de chaque coefficient estimé. Les étoiles servent à représenter différents niveaux de significativité : *** pour un niveau très significatif, ** pour un niveau significatif, * pour un niveau de signification modéré, . pour un niveau de signification faible.
+# 
+# Dispersion parameter : fournit l'estimation de la variance de la distribution des résidus.
+# 
+# Null deviance : indique la deviance du modèle nul, c'est-à-dire un modèle qui ne contient aucune variable explicative.
+# 
+# Residual deviance : indique la deviance résiduelle du modèle, c'est-à-dire la deviance restante après avoir ajusté le modèle aux données.
+# 
+# AIC : fournit le critère d'information d'Akaike, un critère d'ajustement qui tient compte de la complexité du modèle et de l'ajustement aux données.
+# 
+# Number of Fisher Scoring iterations : indique le nombre d'itérations nécessaires pour estimer les paramètres du modèle.
+
+```
+Les résultats de la régression logistique indiquent que l'âge est significativement associé à la gravité des accidents. Plus précisément, pour une unité d'augmentation de l'âge, la log-odds d'avoir une gravité plus élevée diminue de 0,00667. Cela peut être interprété comme une diminution de la probabilité d'avoir une gravité plus élevée pour chaque année supplémentaire.
+
+Le rapport des deviances (null deviance et residual deviance) montre que le modèle ajuste bien les données, car il y a une réduction significative de la deviance résiduelle par rapport à la deviance nulle. En outre, l'AIC est relativement faible, ce qui indique que le modèle est un ajustement approprié pour les données.
+
+Le test de significativité indique que la relation entre l'âge et la gravité de l'accident est très significative (p-value < 2e-16), ce qui renforce l'idée que l'âge est un facteur important à prendre en compte dans l'évaluation de la gravité des accidents de la route.
+
+En résumé, les résultats de la régression logistique soutiennent l'idée que l'âge est significativement associé à la gravité des accidents de la route et que le modèle est un ajustement approprié pour les données.
+
+
+# Est-ce que le sexe influence la gravité des accidents ?
+
+```{r}
+sub_df <- df[, c("grav", "sexe")]
+
+# enleve les na
+sub_df <- na.omit(sub_df) %>% filter(sexe != -1)
+
+tab <- table(sub_df$sexe, sub_df$grav)
+
+# Conversion de la table croisée en un data frame
+df_s <- as.data.frame.matrix(tab)
+df_s$sexe <- rownames(df_s)
+
+# Mise en forme des données pour un diagramme en barres empilées
+df_long <- tidyr::gather(df_s, key = "grav", value = "count", -sexe)
+df_long$grav <- factor(df_long$grav, levels = c("1", "2", "3", "4"))
+df_long$sexe <- factor(df_long$sexe, levels = c("1", "2"))
+
+# Convertir la variable grav en factor avec les niveaux correspondants
+df_long$grav <- factor(df_long$grav, levels = 1:4,
+                       labels = c("Indemne", "Tué", "Blessé hospitalisé", "Blessé léger"))
+
+df_long$sexe <- factor(df_long$sexe, levels = 1:2,
+                       labels = c("Homme", "Femme"))
+
+# Définir les couleurs personnalisées
+colors <- c("Indemne" = "#00BFFF", 
+            "Blessé léger" = "#FFD700", 
+            "Blessé hospitalisé" = "#FF6347", 
+            "Tué" = "#800000")
+
+# Créer le graphique
+ggplot(df_long, aes(x = sexe, fill = grav)) +
+  geom_col(position = "dodge", aes(y = count)) +
+  scale_fill_manual(values = colors, name = "Gravité de l'accident",
+                    labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Tué")) +
+  labs(title = "Gravité des accidents par sexe", x = "Sexe", y = "Nombre d'accidents")
+
+ 
+
+```
+
+```{r}
+#test du X²
+
+chisq.test(table(sub_df$sexe, sub_df$grav))
+
+```
+
+
+
+## Est ce que le lieux influence les accidents ?
+
 
 ```{r echo=FALSE, warning=FALSE}
 # Importer les données géographiques
@@ -102,13 +284,32 @@ map_df <- left_join(regions_geojson, df_region, by = c("nom" = "region"))
 # Créer la carte
 ggplot() +
   geom_sf(data = map_df, aes(fill = n_accidents)) +
-  scale_fill_gradient(low = "lightyellow", high = "darkorange") +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
   ggtitle("Nombre d'accidents par région en France en 2021") +
   theme_void()
 ```
 
+```{r echo=FALSE, warning=FALSE}
+# Importer les données géographiques
+deps_geojson <- st_read("https://france-geojson.gregoiredavid.fr/repo/departements.geojson")
 
-## Est ce que les usagers influencent la gravité des accidents ?
+# Calculer le nombre d'accidents par région
+df_dep <- df %>%
+  group_by(dep) %>%
+  summarise(n_accidents = n())
+
+# Fusionner les données géographiques et les données de nombre d'accidents
+map_df <- left_join(deps_geojson, df_dep, by = c("code" = "dep"))
+
+# Créer la carte
+ggplot() +
+  geom_sf(data = map_df, aes(fill = n_accidents)) +
+  scale_fill_gradient2(low = "lightyellow", mid="darkorange", high = "darkred", midpoint = 3000) +
+  ggtitle("Nombre d'accidents par département en France en 2021") +
+  theme_void()
+```
+
+
 - Pour les usagers : 
       - on regade nb d'accidents en fonction du sexe (pour garder l'esprit féministe)
       - le nb et la gravité en fonction de l'âge
