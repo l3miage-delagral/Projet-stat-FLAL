@@ -110,7 +110,7 @@ ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) 
 
 ```{r echo=FALSE, warning=FALSE}
 # Sous-ensemble de données contenant l'âge et le nombre d'accidents pour chaque âge
-sub_df <- df %>% filter(place == 1) %>%
+sub_df <- df %>% filter(place == 1, catu == 1, age > 13) %>%
   group_by(age) %>% 
   summarise(nombre_accidents = n()) %>% 
   filter(!is.na(age))
@@ -120,7 +120,7 @@ ggplot(sub_df, aes(x = nombre_accidents, y = age)) +
   geom_boxplot() +
   ylab("Âge du conducteur") +
   xlab("Nombre d'accidents") +
-  coord_flip()
+  coord_flip() + ggtitle("Boxplot sur l'âge des conducteurs/conductrices")
 
 # Afficher les statistiques du boxplot
 print(boxplot.stats(sub_df$age))
@@ -128,18 +128,24 @@ print(boxplot.stats(sub_df$age))
 
 ```
 
-Sur 126086 accidents de la route en 2021, 50 % des conducteurs ont moins de 50.5 ans. 50 % d'entre eux ont entre 25.5 et 77.5 ans.
+Sur 126086 accidents de la route en 2021, 50 % des conducteurs ont moins de 57 ans. 50 % d'entre eux ont entre 35.5 et 78.5 ans.
 
 
-Dans ce cas, l'intervalle de confiance est [42.6, 58.4], ce qui signifie que l'on peut être raisonnablement sûr que la moyenne de l'âge dans la population dont l'échantillon a été prélevé se trouve dans cette plage avec une probabilité de 95%.
+Dans ce cas, l'intervalle de confiance est [49.7,64.3], ce qui signifie que l'on peut être raisonnablement sûr que la moyenne de l'âge dans la population dont l'échantillon a été prélevé se trouve dans cette plage avec une probabilité de 95%.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ## remettre dans l'ordre les chiffres de grav
 # accidents par année de naissance en 2021
+plot_usagers <- df %>% filter(catu == 1, age > 13) %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
+ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
+  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge du conducteurs")+    theme(legend.position='none') + xlab("Âge du conducteur") + ylab("Effectif")
+
+
+
 plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
-  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge")+    theme(legend.position='none') + xlab("Âge") + ylab("Effectif")
+  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge des personnes touchées")+    theme(legend.position='none') + xlab("Âge") + ylab("Effectif")
 
 rm(plot_usagers, plot_sexe)
 ```
@@ -234,35 +240,80 @@ df_long$sexe <- factor(df_long$sexe, levels = c("1", "2"))
 
 # Convertir la variable grav en factor avec les niveaux correspondants
 df_long$grav <- factor(df_long$grav, levels = 1:4,
-                       labels = c("Indemne", "Tué", "Blessé hospitalisé", "Blessé léger"))
+                       labels = c("Indemne", "Mort", "Blessé hospitalisé", "Blessé léger"))
 
 df_long$sexe <- factor(df_long$sexe, levels = 1:2,
                        labels = c("Homme", "Femme"))
 
 # Définir les couleurs personnalisées
-colors <- c("Indemne" = "#00BFFF", 
-            "Blessé léger" = "#FFD700", 
-            "Blessé hospitalisé" = "#FF6347", 
-            "Tué" = "#800000")
+colors <- c("Homme" = "pink", 
+            "Femme" = "lightblue")
+
+
+# Réorganiser les niveaux de la variable "grav" en fonction de la fréquence
+df_long$grav <- reorder(df_long$grav, desc(df_long$count))
 
 # Créer le graphique
-ggplot(df_long, aes(x = sexe, fill = grav)) +
+ggplot(df_long, aes(x = grav, fill = sexe)) +
   geom_col(position = "dodge", aes(y = count)) +
-  scale_fill_manual(values = colors, name = "Gravité de l'accident",
-                    labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Tué")) +
-  labs(title = "Gravité des accidents par sexe", x = "Sexe", y = "Nombre d'accidents")
+  scale_fill_manual(values = colors, name = "Sexe",
+                    labels = c("Homme", "Femme")) +
+  labs(title = "Gravité des accidents par sexe", x = "Sexe", y = "Nombre d'accidents") + theme_gray()
 
- 
 
 ```
+```{r echo=FALSE, warning=FALSE}
+d <- df %>% filter(age > 13, catu == 1)
 
-```{r}
+sub_df <- d[, c("grav", "sexe")]
+
+# enleve les na
+sub_df <- na.omit(sub_df) %>% filter(sexe != -1)
+
+tab <- table(sub_df$sexe, sub_df$grav)
+
+# Conversion de la table croisée en un data frame
+df_s <- as.data.frame.matrix(tab)
+df_s$sexe <- rownames(df_s)
+
+# Mise en forme des données pour un diagramme en barres empilées
+df_long <- tidyr::gather(df_s, key = "grav", value = "count", -sexe)
+df_long$grav <- factor(df_long$grav, levels = c("1", "2", "3", "4"))
+df_long$sexe <- factor(df_long$sexe, levels = c("1", "2"))
+
+# Convertir la variable grav en factor avec les niveaux correspondants
+df_long$grav <- factor(df_long$grav, levels = 1:4,
+                       labels = c("Indemne", "Mort", "Blessé hospitalisé", "Blessé léger"))
+
+df_long$sexe <- factor(df_long$sexe, levels = 1:2,
+                       labels = c("Homme", "Femme"))
+
+# Définir les couleurs personnalisées
+colors <- c("Homme" = "pink", 
+            "Femme" = "lightblue")
+
+
+# Réorganiser les niveaux de la variable "grav" en fonction de la fréquence
+df_long$grav <- reorder(df_long$grav, desc(df_long$count))
+
+# Créer le graphique
+ggplot(df_long, aes(x = grav, fill = sexe)) +
+  geom_col(position = "dodge", aes(y = count)) +
+  scale_fill_manual(values = colors, name = "Sexe",
+                    labels = c("Homme", "Femme")) +
+  labs(title = "Gravité des accidents par sexe", x = "Sexe", y = "Nombre d'accidents") + theme_gray()
+```
+
+
+```{r echo=FALSE, warning=FALSE}
 #test du X²
-
-chisq.test(table(sub_df$sexe, sub_df$grav))
+df_conducteurs <- df %>% filter(catu == 1, age > 13)
+chisq.test(table(df_conducteurs$sexe, df_conducteurs$grav))
 
 ```
+Puisque la p-value est inférieure au seuil de significativité communément utilisé de 0,05, on peut rejeter l'hypothèse nulle selon laquelle il n'y a pas d'association entre le sexe et la gravité des accidents de la route. On peut donc conclure qu'il y a une association significative entre le sexe et la gravité des accidents de la route en France en 2021.
 
+Cela signifie que le sexe des conducteurs est statistiquement significatif pour prédire la gravité des accidents de la route en France en 2021. Cependant, il est important de noter que les résultats de ce test ne permettent pas de déterminer la direction de l'association (c'est-à-dire, si les accidents graves sont plus fréquents chez les hommes ou chez les femmes).
 
 
 ## Est ce que le lieux influence les accidents ?
