@@ -259,7 +259,7 @@ ggplot(df_long, aes(x = grav, fill = sexe)) +
   geom_col(position = "dodge", aes(y = count)) +
   scale_fill_manual(values = colors, name = "Sexe",
                     labels = c("Homme", "Femme")) +
-  labs(title = "Gravité des accidents par sexe", x = "Sexe", y = "Nombre d'accidents") + theme_gray()
+  labs(title = "Gravité des accidents par sexe", x = "", y = "Nombre d'accidents") + theme_gray()
 
 
 ```
@@ -302,7 +302,7 @@ ggplot(df_long, aes(x = grav, fill = sexe)) +
   geom_col(position = "dodge", aes(y = count)) +
   scale_fill_manual(values = colors, name = "Sexe",
                     labels = c("Homme", "Femme")) +
-  labs(title = "Gravité des accidents par sexe", x = "Sexe", y = "Nombre d'accidents") + theme_gray()
+  labs(title = "Gravité des accidents par sexe", x = "", y = "Nombre d'accidents") + theme_gray()
 ```
 
 
@@ -321,6 +321,10 @@ Cela signifie que le sexe des conducteurs est statistiquement significatif pour 
 
 
 ```{r echo=FALSE, warning=FALSE}
+
+################### carte du rapport accident_mortel / nb accidents * 100 en France en 2021
+
+
 # Importer les données géographiques
 regions_geojson <- st_read("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions-version-simplifiee.geojson")
 
@@ -337,8 +341,51 @@ ggplot() +
   geom_sf(data = map_df, aes(fill = n_accidents)) +
   scale_fill_gradient(low = "lightyellow", high = "darkred") +
   ggtitle("Nombre d'accidents par région en France en 2021") +
+  labs(fill="Nombre d'accidents") +
   theme_void()
+
+
+
+
+
+########### carte du nombre d'accidents par région en France en 2021
+
+# Calculer le nombre d'accidents par région
+df_region <- df %>%
+  group_by(region) %>%
+  summarise(n_accidents = n(),
+            n_accidents_mortels = sum(grav == 2),
+            taux_accidents_mortels = round(sum(grav == 2)/n_accidents, 4)*100)
+
+# Fusionner les données géographiques et les données de nombre d'accidents
+map_df <- left_join(regions_geojson, df_region, by = c("nom" = "region"))
+
+# Créer la carte
+ggplot() +
+  geom_sf(data = map_df, aes(fill = taux_accidents_mortels)) +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
+  ggtitle("Rapport du nombre d'accidents mortels sur le nombre d'accidents par région") + 
+  labs(fill = "Taux d'accidents graves") +
+  theme_void()
+
+
+
+
+
+# Créer une table de contingence croisant la région et la gravité de l'accident
+cont_table <- table(df$region, df$grav)
+
+# Effectuer le test du chi2
+chi2 <- chisq.test(cont_table)
+chi2
+
+
 ```
+
+Le résultat du test montre une statistique de test de 6065.5 et un degré de liberté de 39, ce qui donne une p-value inférieure à 2.2e-16.
+
+La p-value est très faible, ce qui suggère qu'il y a une forte association entre la région et la gravité de l'accident. Autrement dit, la gravité des accidents semble varier significativement selon la région où ils se produisent.
+
 
 ```{r echo=FALSE, warning=FALSE}
 # Importer les données géographiques
@@ -355,10 +402,44 @@ map_df <- left_join(deps_geojson, df_dep, by = c("code" = "dep"))
 # Créer la carte
 ggplot() +
   geom_sf(data = map_df, aes(fill = n_accidents)) +
-  scale_fill_gradient2(low = "lightyellow", mid="darkorange", high = "darkred", midpoint = 3000) +
+  scale_fill_gradient2(low = "lightyellow", mid = "orange",high = "darkred", midpoint = 6000) +
   ggtitle("Nombre d'accidents par département en France en 2021") +
+  labs(fill="Nombre d'accidents") +
   theme_void()
+
+
+
+
+########### carte du nombre d'accidents par région en France en 2021
+
+# Calculer le nombre d'accidents par région
+df_dep <- df %>%
+  group_by(dep) %>%
+  summarise(n_accidents = n(),
+            n_accidents_mortels = sum(grav == 2),
+            taux_accidents_mortels = round(sum(grav == 2)/n_accidents, 4)*100)
+
+# Fusionner les données géographiques et les données de nombre d'accidents
+map_df <- left_join(deps_geojson, df_dep, by = c("code" = "dep"))
+
+# Créer la carte
+ggplot() +
+  geom_sf(data = map_df, aes(fill = taux_accidents_mortels)) +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
+  ggtitle("Rapport du nombre d'accidents mortels sur le nombre d'accidents par département") + 
+  labs(fill = "Taux d'accidents graves") +
+  theme_void()
+
+# Créer une table de contingence croisant la région et la gravité de l'accident
+cont_table <- table(df$dep, df$grav)
+
+# Effectuer le test du chi2
+chi2 <- chisq.test(cont_table)
+chi2
+
 ```
+Dans les deux résultats, la statistique de test est très élevée (6065.5 pour les régions et 10960 pour les départements), ce qui suggère qu'il existe un lien significatif entre la région/departement et la gravité de l'accident.
+
 
 
 - Pour les usagers : 
