@@ -74,7 +74,7 @@ plot_acc$nom_mois <- factor(sapply(plot_acc$mois, nom_mois), levels = mois_ordre
 ggplot(data = plot_acc, aes(x=nom_mois, y=count)) +
   geom_col(stat="identity", fill="darkred") +
   ylab("nombre d'accidents") +
-  xlab("mois") +
+  xlab("") +
   ggtitle("Nombre d'accidents par mois en 2021")
 
 rm(plot_acc, noms_mois)
@@ -97,7 +97,7 @@ accidents_par_heure <- df %>%
 # Visualiser le nombre d'accidents par heure de la journée
 ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) +
   geom_bar(stat = "identity", fill = "darkred") +
-  xlab("Heure de la journée") +
+  xlab("") +
   ylab("Nombre d'accidents") +
   ggtitle("Nombre d'accidents par période de la journée en 2021")
 
@@ -105,9 +105,9 @@ ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) 
 
 
 
-## Est ce que les usagers influencent la gravité des accidents ?
+# Est ce que les usagers influencent la gravité des accidents ?
 
-# Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident
+## Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident
 
 ```{r echo=FALSE, warning=FALSE}
 # Sous-ensemble de données contenant l'âge et le nombre d'accidents pour chaque âge
@@ -151,6 +151,9 @@ ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
 rm(plot_usagers, plot_sexe)
 ```
 
+
+
+
 ```{r echo=FALSE, warning=FALSE}
 # Sous-ensemble de données contenant la gravité de l'accident et l'âge du conducteur
 sub_df <- df[, c("grav", "age")]
@@ -168,6 +171,8 @@ ggplot(sub_df, aes(x = age, fill = factor(grav))) +
 
 
 ```
+
+
 De manière générale, le graphique de densité montre comment les distributions de l'âge des conducteurs diffèrent selon la gravité de l'accident. On remarque un fort pic de densité autour de 20 ans ce qui laisse penser à une forte corrélation entre l'age et la gravité de l'accident.
 
 
@@ -302,7 +307,7 @@ ggplot(df_long, aes(x = grav, fill = sexe)) +
   geom_col(position = "dodge", aes(y = count)) +
   scale_fill_manual(values = colors, name = "Sexe",
                     labels = c("Homme", "Femme")) +
-  labs(title = "Gravité des accidents par sexe", x = "", y = "Nombre d'accidents") + theme_gray()
+  labs(title = "Gravité des accidents par sexe du conducteur", x = "", y = "Nombre d'accidents") + theme_gray()
 ```
 
 
@@ -317,7 +322,7 @@ Puisque la p-value est inférieure au seuil de significativité communément uti
 Cela signifie que le sexe des conducteurs est statistiquement significatif pour prédire la gravité des accidents de la route en France en 2021. Cependant, il est important de noter que les résultats de ce test ne permettent pas de déterminer la direction de l'association (c'est-à-dire, si les accidents graves sont plus fréquents chez les hommes ou chez les femmes).
 
 
-## Est ce que le lieux influence les accidents ?
+## Est ce que le lieux influence la gravité des accidents ?
 
 
 ```{r echo=FALSE, warning=FALSE}
@@ -439,6 +444,9 @@ chi2
 
 ```
 Dans les deux résultats, la statistique de test est très élevée (6065.5 pour les régions et 10960 pour les départements), ce qui suggère qu'il existe un lien significatif entre la région/departement et la gravité de l'accident.
+
+
+## Est ce que l'environnement influence la gravité des accidents ?
 
 
 
