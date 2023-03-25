@@ -151,6 +151,10 @@ ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
 rm(plot_usagers, plot_sexe)
 ```
 
+On constate la même croissance du nombre d'accidents mortels (conducteur ou non) de 0 à 23 ans, les personnes touchées sont plus nombreuses, ce qui est normal il y a les passagers ajoutés. La tendance décroît fortement de 23 à 40 ans avant de rester plus ou moins au même niveau jusqu'à environ 70 ans.
+Pour les conducteurs, ont constate une décroissance nette plus tôt que chez les personnes touchées, une hypothèse serait que plus l'âge augmente, moins il y a de conducteurs.
+
+Le fort pique autour de 20 ans pourrait s'expliquer par l'âge de l'obtention du permis de conduire qui se traduit par un manque d'expérience en tant que conducteur.
 
 
 
@@ -309,6 +313,8 @@ ggplot(df_long, aes(x = grav, fill = sexe)) +
                     labels = c("Homme", "Femme")) +
   labs(title = "Gravité des accidents par sexe du conducteur", x = "", y = "Nombre d'accidents") + theme_gray()
 ```
+
+On remarque que, conducteur/trice ou non, la tendance reste la même au niveau de la gravité. La quantité d'accidents reste plus importe chez les hommes que chez les femmes.
 
 
 ```{r echo=FALSE, warning=FALSE}
