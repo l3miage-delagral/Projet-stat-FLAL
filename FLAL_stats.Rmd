@@ -467,4 +467,59 @@ Dans les deux résultats, la statistique de test est très élevée (6065.5 pour
       - On regarde la gravité en fonction de la vitesse autorisée (en agglo (50km/h)n etc...)
       - On regarde le nb et la gravité en fonction de l'état de la route (mouillée, eneigée, sèche)
       - On regarde le nb et la gravité en fonction de l'éclairage de la route (nuit noire, jour, éclairage urbain etc...)
+      
+```{r echo=FALSE, warning=FALSE}
+d <- df %>% filter(age > 13, catu == 1)
+
+sub_df <- d[, c("grav", "lum")]
+
+# enleve les na
+sub_df <- na.omit(sub_df) %>% filter(lum != -1)
+
+tab <- table(sub_df$lum, sub_df$grav)
+
+# Conversion de la table croisée en un data frame
+df_s <- as.data.frame.matrix(tab)
+df_s$lum <- rownames(df_s)
+
+# Mise en forme des données pour un diagramme en barres empilées
+df_long <- tidyr::gather(df_s, key = "grav", value = "count", -lum)
+df_long$grav <- factor(df_long$grav, levels = c("1", "2", "3", "4"))
+df_long$sexe <- factor(df_long$lum, levels = c("1", "2", "3", "4", "5"))
+
+# Convertir la variable grav en factor avec les niveaux correspondants
+df_long$grav <- factor(df_long$grav, levels = 1:4,
+                       labels = c("Indemne", "Mort", "Blessé hospitalisé", "Blessé léger"))
+
+df_long$lum <- factor(df_long$sexe, levels = 1:2:3:4:5,
+                    labels = c("Plein jour", 
+                            "Crépuscule ou aube",
+                            "Nuit sans éclairage public",
+                            "Nuit avec éclairage public non allumé",
+                            "Nuit avec éclairage public allumé"))
+
+# Définir les couleurs personnalisées
+colors <- c("Plein jour"="yellow", 
+        "Crépuscule ou aube"="orange",
+        "Nuit sans éclairage public"="black",
+        "Nuit avec éclairage public non allumé"="blue",
+        "Nuit avec éclairage public allumé"="lightblue")
+
+
+# Réorganiser les niveaux de la variable "grav" en fonction de la fréquence
+df_long$grav <- reorder(df_long$grav, desc(df_long$count))
+
+# Créer le graphique
+ggplot(df_long, aes(x = grav, fill = lum)) +
+  geom_col(position = "dodge", aes(y = count)) +
+  scale_fill_manual(values = colors, name = "Conditions d'eclairage",
+                    labels = c("Plein jour", 
+                            "Crépuscule ou aube",
+                            "Nuit sans éclairage public",
+                            "Nuit avec éclairage public non allumé",
+                            "Nuit avec éclairage public allumé")) +
+  labs(title = "Gravité des accidents par condition d'eclairage", x = "", y = "Nombre d'accidents") + theme_gray()+
+  coord_flip()
+
+```
 
