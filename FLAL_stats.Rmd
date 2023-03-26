@@ -344,6 +344,7 @@ df_region <- df %>%
   group_by(region) %>%
   summarise(n_accidents = n())
 
+
 # Fusionner les données géographiques et les données de nombre d'accidents
 map_df <- left_join(regions_geojson, df_region, by = c("nom" = "region"))
 
@@ -530,15 +531,24 @@ df_secu$secu3 <- factor(df$secu3, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
                                 "Gilet réfléchissant", "Airbag", "Gants", "Gants + Airbag", 
                                 "Non déterminable", "Autre"))
 
-ggplot(df_secu, aes(x = grav, fill = secu1)) + 
-  geom_bar(position = "fill") +
-  scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
-                               "#D55E00", "#CC79A7", "#999999", "#000000" ,"#570B66", "#382B53")) +
-  labs(title = "Lien entre l'équipement de sécurité et la gravité de l'accident",
-       x = "Gravité de l'accident", y = "Proportion") +
-  theme_classic() +
-  scale_y_continuous(trans = "log")
+# ggplot(df_secu, aes(x = grav, fill = secu1)) +
+#   geom_bar(position = "fill") +
+#   scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
+#                                "#D55E00", "#CC79A7", "#999999", "#000000" ,"#570B66", "#382B53")) +
+#   labs(title = "Lien entre l'équipement de sécurité et la gravité de l'accident",
+#        x = "Gravité de l'accident", y = "Proportion") +
+#   theme_classic() +
+#   scale_y_continuous(trans = "log")
 
+# Créer un dataframe avec les données de secu1
+df_secu1 <- data.frame(table(df_secu$secu1))
+
+ggplot(df_secu, aes(x = secu1, fill = grav)) + 
+  geom_bar(position = "fill") +
+  facet_grid(. ~ grav, scales = "free_y", space = "free_y") +
+  scale_x_reordered() +
+  labs(x = "Équipements de sécurité", y = "Proportion d'accidents") +
+  theme(legend.position = "bottom")
 
 ```
 
