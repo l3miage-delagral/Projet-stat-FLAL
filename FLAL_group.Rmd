@@ -1,0 +1,109 @@
+---
+title: "Analyse des accidents de la route pendant l'année 2021 en fonction du lieu, de la période, de l'age et du sexe"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    
+---
+
+##### Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r include=FALSE}
+## import des données
+
+caracteristiques_2021 <- read.csv("data/carcteristiques-2021.csv", sep=";", encoding = "UTF-8")
+
+caracteristiques_2021$Num_Acc <- as.character(caracteristiques_2021$Num_Acc)
+
+
+
+
+
+usagers_2021 <- read.csv("data/usagers-2021.csv", sep=";", encoding = "UTF-8")
+
+usagers_2021$Num_Acc <- as.character(usagers_2021$Num_Acc)
+## filter pour enlever les données non renseignées
+usagers_2021 <- usagers_2021 %>% filter(usagers_2021$grav != -1)
+
+
+
+
+vehicules_2021 <- read.csv("data/vehicules-2021.csv", sep=";", encoding = "UTF-8")
+
+vehicules_2021$Num_Acc <- as.character(vehicules_2021$Num_Acc)
+
+
+
+
+lieux_2021 <- read.csv("data/lieux-2021.csv", sep=";", encoding = "UTF-8")
+
+lieux_2021$Num_Acc <- as.character(lieux_2021$Num_Acc)
+```
+
+```{r include=FALSE}
+## fusion du jeu de données global
+tmp <- merge(caracteristiques_2021, lieux_2021, by ="Num_Acc")
+tmp1 <- merge(usagers_2021, vehicules_2021, by=c("Num_Acc", "id_vehicule", "num_veh"))
+data <- merge(tmp1, tmp, by="Num_Acc")
+rm(tmp, tmp1)
+```
+
+
+```{r include=FALSE}
+## preparation des données (on supprime ce qui nous interesse pas)
+## unité : une personne
+## population : les accidents en France en 2021
+## ajouter une colonne calculée pour l'age
+## catégorie catv à réduire / regrouper
+data <- data %>% select(-an, -int, -adr, -locp, -actp, -etatp, -senc, -obs, -choc, -manv, -motor, -occutc, -catr, -voie, -v1, -v2, -circ, -nbv, -vosp, -prof, -pr, -pr1, -plan, -lartpc, -larrout, -surf, -infra, -situ, -atm)
+```
+
+
+
+
+## Etude globale sur les accidents
+
+```{r pressure, echo=FALSE}
+
+
+# accidents par année de naissance en 2021
+plot_acc <- data %>% group_by(data$Num_Acc, data$mois) %>% summarize("count" = n())
+
+ggplot(data = plot_acc, aes(x=`data$mois`, y=count, fill=`data$mois`)) +
+  geom_bar(stat="identity") + ylab("nombre d'accident") + xlab("mois") + ggtitle("Nombre d'accidents par mois en 2021");
+
+rm(plot_acc)
+```
+
+## Tests plots sur les usagers (à revoir)
+
+```{r echo=FALSE}
+
+
+# accidents par année de naissance en 2021
+plot_usagers <- usagers_2021 %>% group_by(usagers_2021$an_nais) %>% summarize("count" = n())
+
+ggplot(data = plot_usagers, aes(x=`usagers_2021$an_nais`, y=count)) +
+  geom_bar(stat="identity");
+
+## par age ca serait pas mal
+
+## par sexe
+# Nombre de personne touchées par les accidents par sexe en 2021
+table(usagers_2021$sexe)
+
+# plot des conducteurs/trices impliqués dans un accident par sexe en 2021
+plot_sexe <- usagers_2021 %>% group_by(sexe) %>% filter(place == 1) %>% summarize("count" = n())
+#plot_sexe <- transform( data_frame, sexe1= c("NA", "Homme", "Femme"))
+#ggplot(data = plot_sexe, aes(x=sexe, y=count, fill=sexe)) + geom_bar(stat="identity");
+
+```
