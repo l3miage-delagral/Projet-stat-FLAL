@@ -2,10 +2,10 @@
 title: Analyse des accidents de la route pendant l'année 2021 en fonction du lieu,
   de la période, de l'age et du sexe
 output:
-  html_document:
+  pdf_document:
     toc: yes
     toc_depth: 2
-  pdf_document:
+  html_document:
     toc: yes
     toc_depth: 2
 ---
@@ -14,15 +14,14 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(xfun)
 library(dplyr)
 library(readxl)
 library(tidyverse)
 library(ggplot2)
-library(leaflet)
+library(leaflet) 
 library(maps)
 library(sf)
-library(dplyr)
 library(lubridate)
 ```
 
