@@ -45,9 +45,13 @@ df$lat <- sub(",", ".", df$lat)
 df$long <- sub(",", ".", df$long)
 df$lat <- as.numeric(df$lat)
 df$long <- as.numeric(df$long)
+
 # magouille pour éliminer les caractères spéciaux de région
-df$region <- iconv(df$region, from = "ISO-8859-1", to = "UTF-8")
-df$region <- sub("ï¿½Ã®", "î", df$region)
+# df$region <- iconv(df$region, from = "ISO-8859-1", to = "UTF-8")
+# df$region <- sub("ï¿½Ã®", "î", df$region)
+# df$region <- sub("Ã*", "î", df$region)
+
+
 # charcter bizarre dans id_vehicule
 df$id_vehicule <- iconv(df$id_vehicule, from = "ISO-8859-1", to = "UTF-8")
 df$id_vehicule <- as.character(df$id_vehicule)
@@ -370,9 +374,6 @@ cont_table <- table(df$dep, df$grav)
 chi2 <- chisq.test(cont_table)
 chi2
 ```
-
-
-
 Dans les deux résultats, la statistique de test est très élevée (6065.5 pour les régions et 10960 pour les départements), ce qui suggère qu'il existe un lien significatif entre la région/departement et la gravité de l'accident.
 
 
