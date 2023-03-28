@@ -362,32 +362,7 @@ chi2 <- chisq.test(cont_table)
 chi2
 ```
 
-```{r echo=FALSE, warning=FALSE}
-df_surf <- df %>% 
-    group_by(surf,grav) %>%
-    filter(surf != -1) %>%
-    filter(surf != 9) %>%
-    summarise(n_accidents = n())
 
-              
-colors_gravite <- c("Indemne" = "green",
-                    "Tué" = "red",
-                    "Blessé hospitalisé" = "orange",
-                    "Blessé léger" = "purple")
-
-df_surf$grav <- factor(df_surf$grav,levels = 1:4,
-                       labels =  c("Indemne", "Tué", "Blessé hospitalisé", "Blessé léger"))
-
-df_surf$surf <- factor(df_surf$surf, levels = 1:8,
-                       labels = c("Normale", "Mouillée","Flaques","Inondée","Enneigée","Boue","Verglacée","Corps gras"))
-            
-ggplot(df_surf, aes(x = surf)) +
-  geom_col(position = "dodge", aes(y = n_accidents, fill = as.factor(grav))) +
-  scale_fill_manual(values = colors_gravite, name = "Surface",
-                    labels = c("Indemne", "Tué", "Blessé hospitalisé", "Blessé léger")) +
-  labs(title = "Nombre d'accidents par rapport au type de surface de la route", x = "", y = "Nombre d'accidents")
-
-```
 
 Dans les deux résultats, la statistique de test est très élevée (6065.5 pour les régions et 10960 pour les départements), ce qui suggère qu'il existe un lien significatif entre la région/departement et la gravité de l'accident.
 
