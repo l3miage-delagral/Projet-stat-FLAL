@@ -131,10 +131,10 @@ Dans ce cas, l'intervalle de confiance est [49.7,64.3], ce qui signifie que l'on
 # accidents par année de naissance en 2021
 plot_usagers <- df %>% filter(catu == 1, age > 13) %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
-  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge du conducteurs")+    theme(legend.position='none') + xlab("Âge du conducteur") + ylab("Effectif")
+  geom_bar(stat="identity", fill = "#339966") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge du conducteurs")+    theme(legend.position='none') + xlab("Âge du conducteur") + ylab("Effectif")
 plot_usagers <- df %>% group_by(age, grav) %>% summarize("count" = n()) %>% filter(grav == 2)
 ggplot(data = plot_usagers, aes(x=age, y=count, fill=grav)) +
-  geom_bar(stat="identity") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge des personnes touchées")+    theme(legend.position='none') + xlab("Âge") + ylab("Effectif")
+  geom_bar(stat="identity", fill = "#339966") + geom_smooth(se=FALSE, color = "orange") + ggtitle("Effectif des accidents mortels par âge des personnes touchées")+    theme(legend.position='none') + xlab("Âge") + ylab("Effectif")
 rm(plot_usagers, plot_sexe)
 ```
 
