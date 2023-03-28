@@ -1,11 +1,12 @@
 ---
 title: Analyse des accidents de la route pendant l'année 2021 en fonction du lieu,
   de la période, de l'age et du sexe
+author: "Groupe FLAL"
 output:
-  pdf_document:
+  html_document:
     toc: yes
     toc_depth: 2
-  html_document:
+  pdf_document:
     toc: yes
     toc_depth: 2
 ---
