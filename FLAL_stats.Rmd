@@ -594,8 +594,8 @@ df_long$lum <- factor(df_long$sexe, levels = 1:2:3:4:5,
 # Définir les couleurs personnalisées
 colors <- c("Plein jour"="yellow", 
         "Crépuscule ou aube"="orange",
-        "Nuit sans éclairage public"="black",
-        "Nuit avec éclairage public non allumé"="blue",
+        "Nuit sans éclairage public"="darkblue",
+        "Nuit avec éclairage public non allumé"="purple",
         "Nuit avec éclairage public allumé"="lightblue")
 
 
@@ -604,7 +604,7 @@ df_long$grav <- reorder(df_long$grav, desc(df_long$count))
 
 # Créer le graphique
 ggplot(df_long, aes(x = grav, fill = lum)) +
-  geom_col(position = "dodge", aes(y = count)) +
+  geom_col(position = "dodge", aes(y = count), alpha = 0.8) +
   scale_fill_manual(values = colors, name = "Conditions d'eclairage",
                     labels = c("Plein jour", 
                             "Crépuscule ou aube",
