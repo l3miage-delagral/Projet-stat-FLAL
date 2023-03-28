@@ -25,8 +25,11 @@ library(sf)
 library(lubridate)
 ```
 
+
 Dans ce rapport, nous cherchons à expliquer la gravité des accidents en France en 2021. Le jeu de données vient du site data.gouv.fr.
-La question dans ce dossier est : quels sont les facteurs importants impactant la gravité des accidents en France en 2021 ?
+La question dans ce dossier est : 
+
+### <strong>Quels sont les facteurs importants impactant la gravité des accidents en France en 2021 ?</strong>
 
 
 Pour trier le jeu de données, nous avons d'abord commencé par enlever les lignes de la dataframe sans données dans lesquelles les colonnes étaient remplies de -1. On a ensuite trié les colonnes pour supprimer les colonnes que nous n'allons pas regarder dans notre études comme par exemple le type de moteur du véhicule. Pour finir il fallait enlever les caractères spéciaux des régions. Après tout cela nous avons un jeu de données propre et exploitable.
@@ -60,6 +63,9 @@ df$id_vehicule <- as.character(df$id_vehicule)
 
 ## Etude globale sur les accidents en 2021 en France
 
+On regarde d'abord juste une étude globale sur le nombre d'accidents en France en fonction du mois de l'année.
+
+
 ```{r pressure, echo=FALSE, warning=FALSE}
 # accidents par mois en 2021
 plot_acc <- df %>% group_by(mois) %>% summarize("count" = n())
@@ -80,6 +86,10 @@ ggplot(data = plot_acc, aes(x=nom_mois, y=count)) +
 rm(plot_acc, noms_mois)
 ```
 
+Ici on voit un gros pique en juin qui peut s'éxpliquer par la fin du confinement de 2021 ce qui a poussé les gens à sortir et donc à plus prendre la voiture donc forcément il y plus d'accidents.
+
+On peut aussi regarder le nombre d'accidents en fonction de la période de la journée : nuit, matin, après-midi ou soir
+
 ```{r echo=FALSE, warning=FALSE}
 # créer la colonne "heure"
 # df$heure <- hms(sprintf("%02d:%02d:00", df$hrmn %/% 100, df$hrmn %% 100))
@@ -97,12 +107,11 @@ ggplot(accidents_par_heure, aes(x = heure_de_la_journee, y = nombre_accidents)) 
   ylab("Nombre d'accidents") +
   ggtitle("Nombre d'accidents par période de la journée en 2021")
 ```
+On s'attend à voir ce graphique comme résultat, avec plus d'accidents en après-midi et le matin puisque c'est dans ces moments là de la journée que l'activité française est au plus haut avec les départs au travail et les enfants à l'école.
 
+## Est ce que les usagers influencent la gravité des accidents ?
 
-
-# Est ce que les usagers influencent la gravité des accidents ?
-
-## Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident
+### Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident
 
 ```{r echo=FALSE, warning=FALSE}
 # Sous-ensemble de données contenant l'âge et le nombre d'accidents pour chaque âge
@@ -139,9 +148,9 @@ rm(plot_usagers, plot_sexe)
 ```
 
 On constate la même croissance du nombre d'accidents mortels (conducteur ou non) de 0 à 23 ans, les personnes touchées sont plus nombreuses, ce qui est normal il y a les passagers ajoutés. La tendance décroît fortement de 23 à 40 ans avant de rester plus ou moins au même niveau jusqu'à environ 70 ans.
-Pour les conducteurs, ont constate une décroissance nette plus tôt que chez les personnes touchées, une hypothèse serait que plus l'âge augmente, moins il y a de conducteurs.
+Pour les conducteurs, on constate une décroissance nette plus tôt que chez les personnes touchées, une hypothèse serait que plus l'âge augmente, moins il y a de conducteurs.
 
-Le fort pique autour de 20 ans pourrait s'expliquer par l'âge de l'obtention du permis de conduire qui se traduit par un manque d'expérience en tant que conducteur.
+Le fort pique autour de 20 ans pourrait s'expliquer par l'âge de l'obtention du permis de conduire qui se traduit par un manque d'expérience en tant que conducteur. Cela pourrait aussi s'expliquer, dans le cas des personnes touchés par le fait que pas 100% des jeunes d'environ 20 ans ont une voiture, donc une personne de 20 ans avec une voiture va plus avoir tendance à amener avec lui ses amis donc un accident d'une voiture d'une personne de 20 ans compte possiblement 2, 3 voire 4 personnes. 
 
 
 
@@ -204,7 +213,7 @@ Le test de significativité indique que la relation entre l'âge et la gravité 
 En résumé, les résultats de la régression logistique soutiennent l'idée que l'âge est significativement associé à la gravité des accidents de la route et que le modèle est un ajustement approprié pour les données.
 
 
-# Est-ce que le sexe influence la gravité des accidents ?
+### Est-ce que le sexe influence la gravité des accidents ?
 
 ```{r}
 sub_df <- df[, c("grav", "sexe")]
@@ -266,7 +275,7 @@ ggplot(df_long, aes(x = grav, fill = sexe)) +
   labs(title = "Gravité des accidents par sexe du conducteur", x = "", y = "Nombre d'accidents") + theme_gray()
 ```
 
-On remarque que, conducteur/trice ou non, la tendance reste la même au niveau de la gravité. La quantité d'accidents reste plus importe chez les hommes que chez les femmes.
+On remarque que, conducteur.trice ou non, la tendance reste la même au niveau de la gravité. La quantité d'accidents reste plus importante chez les hommes que chez les femmes. Cependant, nous n'avons pas la quantité totale de conducteur.trice en France donc on ne peut pas avoir une proportion du nombre d'accidents.
 
 
 ```{r echo=FALSE, warning=FALSE}
@@ -290,12 +299,6 @@ regions_geojson <- st_read("https://raw.githubusercontent.com/gregoiredavid/fran
 df_region <- df %>%
   group_by(region) %>%
   summarise(n_accidents = n())
-
-# Enlever les accents et caracteres spéciaux
-df_region$region <- iconv(df_region$region, from = "ISO-8859-1", to = "UTF-8")
-df_region$region <- sub("Ã´", "ô", df_region$region)
-df_region$region <- sub("Ã©", "é", df_region$region)
-df_region$region <- sub("Ã", "î", df_region$region)
 
 
 
@@ -374,7 +377,7 @@ cont_table <- table(df$dep, df$grav)
 chi2 <- chisq.test(cont_table)
 chi2
 ```
-Dans les deux résultats, la statistique de test est très élevée (6065.5 pour les régions et 10960 pour les départements), ce qui suggère qu'il existe un lien significatif entre la région/departement et la gravité de l'accident.
+Dans les deux résultats, la statistique de test est très élevée (6065.5 pour les régions et 10960 pour les départements), ce qui suggère qu'il existe un lien significatif entre la région/departement et la gravité de l'accident. On remarque que les deux cartes précédentes sont quasiment inverse c'est-à-dire que dans les zones où le nombre d'accidents est élévé, le taux d'accidents mortels l'est moins. On remarque ceci notamment pour la région d'île de france et pour le département du rhône. Cela pourrait s'expliquer par le fait que dans les grandes villes, les accidents se font à  des vitesses réduites. 
 
 
 ## Est ce que l'environnement influence la gravité des accidents ?
@@ -468,11 +471,14 @@ df_secu$secu3 <- factor(df$secu3, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
 df_secu1 <- data.frame(table(df_secu$secu1))
 
 ggplot(df_secu, aes(x = grav, fill = secu1)) +
+  labs(title = "Gravité et nombre d'accidents par rapport à l'équipement de sécurité porté par les passagers",x ="Gravité", y="Nombre d'accidents", fill = "Sécurité") + 
   geom_bar()
 
 
 
 ```
+
+
 
 
   
