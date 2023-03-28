@@ -286,6 +286,15 @@ regions_geojson <- st_read("https://raw.githubusercontent.com/gregoiredavid/fran
 df_region <- df %>%
   group_by(region) %>%
   summarise(n_accidents = n())
+
+# Enlever les accents et caracteres spéciaux
+df_region$region <- iconv(df_region$region, from = "ISO-8859-1", to = "UTF-8")
+df_region$region <- sub("Ã´", "ô", df_region$region)
+df_region$region <- sub("Ã©", "é", df_region$region)
+df_region$region <- sub("Ã", "î", df_region$region)
+
+
+
 # Fusionner les données géographiques et les données de nombre d'accidents
 map_df <- left_join(regions_geojson, df_region, by = c("nom" = "region"))
 # Créer la carte
