@@ -1,11 +1,12 @@
 ---
 title: Analyse des accidents de la route pendant l'année 2021 en fonction du lieu,
   de la période, de l'age et du sexe
+author: "Groupe FLAL"
 output:
-  pdf_document:
+  html_document:
     toc: yes
     toc_depth: 2
-  html_document:
+  pdf_document:
     toc: yes
     toc_depth: 2
 ---
@@ -274,7 +275,7 @@ Puisque la p-value est inférieure au seuil de significativité communément uti
 Cela signifie que le sexe des conducteurs est statistiquement significatif pour prédire la gravité des accidents de la route en France en 2021. Cependant, il est important de noter que les résultats de ce test ne permettent pas de déterminer la direction de l'association (c'est-à-dire, si les accidents graves sont plus fréquents chez les hommes ou chez les femmes).
 
 
-## Est ce que le lieux influence la gravité des accidents ?
+## Est ce que le lieu influence la gravité des accidents ?
 
 
 ```{r echo=FALSE, warning=FALSE}
@@ -393,17 +394,164 @@ Dans les deux résultats, la statistique de test est très élevée (6065.5 pour
 
 ## Est ce que l'environnement influence la gravité des accidents ?
 
+### Est ce que la catégorie de véhicule influence la gravité ?
+```{r echo=FALSE, warning=FALSE}
+#Créer une nouvelle variable "categorie" à partir de la variable "catv"
+df$categorie <- ifelse(df$catv %in% c("01", "02", "03", "05", "06", "30", "31", "32", "33", "34", "41", "42", "43"), "Deux-roues", 
+                   ifelse(df$catv %in% c("04", "07", "10", "11", "12"), "Voiture", 
+                   ifelse(df$catv %in% c("13", "14", "15", "16", "17"), "Camion", 
+                   ifelse(df$catv %in% c("18", "19", "37", "38", "40"), "Transport en commun", 
+                   ifelse(df$catv %in% c("20", "21"), "Engin spécial", "Autre")))))
 
 
-- Pour les usagers : 
-      - on regade nb d'accidents en fonction du sexe (pour garder l'esprit féministe)
-      - le nb et la gravité en fonction de l'âge
+# Créer un tableau croisé entre catv et grav
+ctable <- table(df$categorie, df$grav)
+
+# Convertir en data frame et renommer les colonnes
+df_ctable <- as.data.frame.matrix(ctable)
+colnames(df_ctable) <- c("Indemne", "Mort", "Blessé hospitalisé", "Blessé léger")
+
+# Ajouter une colonne avec le total de chaque catégorie de véhicule
+
+# Ajouter la variable "catv" et convertir en format long pour pouvoir utiliser ggplot
+df_ctable_long <- df_ctable %>% 
+  mutate(catv = rownames(df_ctable)) %>% 
+  gather(key = "grav", value = "count", -catv) %>% 
+  group_by(catv) %>% 
+  mutate(percent = count/sum(count)*100)
+
+
+# Créer le graphique
+ggplot(df_ctable_long, aes(x = percent, y = catv, fill = grav)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Répartition des catégories de véhicules par niveau de gravité",
+       x = "Catégorie de véhicule", y = "Pourcentage") +
+  scale_fill_manual(name = "Gravité de l'accident",
+                    labels = c("Indemne", "Blessé léger", "Blessé hospitalisé", "Mort"),
+                    values = c("green", "yellow", "orange", "red")) +
+  theme_classic()
+
+
+df$grav_binary <- ifelse(df$grav %in% c(2,3), 1, 0)
+
+model <- glm(grav_binary ~ categorie, data = df, family = binomial)
+summary(model)
+
+
+```
+La première partie de la sortie donne quelques informations sur la qualité de l'ajustement du modèle, notamment les résidus de deviance. Dans l'ensemble, les résidus semblent assez faibles, ce qui suggère que le modèle s'adapte bien aux données.
+
+La deuxième partie de la sortie présente les coefficients estimés pour chaque niveau de la variable explicative (les différentes catégories de véhicules). Les coefficients indiquent l'effet de chaque niveau de la variable explicative sur la probabilité de gravité de l'accident. Par exemple, la variable categorieTransport en commun a un coefficient négatif (-1.050340), ce qui signifie qu'être impliqué dans un accident avec un transport en commun diminue la probabilité de gravité de l'accident par rapport aux autres catégories de véhicules.
+
+En somme, ces résultats indiquent que la catégorie de véhicule est un facteur significatif pour prédire la gravité de l'accident, et que certains types de véhicules ont une probabilité de gravité plus élevée ou plus faible que d'autres.
+
+
+### Est ce que l'équipement de sécurité influence la gravité ?
+
+```{r echo=FALSE, warning=FALSE}
+
+
+df_secu = data.frame(df$grav)
+df_secu$grav = df$grav
+
+df_secu$grav <- factor(df$grav, levels = c(1, 2, 3, 4), 
+                     labels = c("Indemne", "Mort","Blessé hospitalisé", "Blessé léger"))
+
+df_secu$secu1 <- factor(df$secu1, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1), 
+                     labels = c("Aucun équipement", "Ceinture", "Casque", "Dispositif enfants", 
+                                "Gilet réfléchissant", "Airbag", "Gants", "Gants + Airbag", 
+                                "Non déterminable", "Autre", "Non renseigné"))
+df_secu$secu2 <- factor(df$secu2, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), 
+                     labels = c("Aucun équipement", "Ceinture", "Casque", "Dispositif enfants", 
+                                "Gilet réfléchissant", "Airbag", "Gants", "Gants + Airbag", 
+                                "Non déterminable", "Autre"))
+df_secu$secu3 <- factor(df$secu3, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), 
+                     labels = c("Aucun équipement", "Ceinture", "Casque", "Dispositif enfants", 
+                                "Gilet réfléchissant", "Airbag", "Gants", "Gants + Airbag", 
+                                "Non déterminable", "Autre"))
+
+# ggplot(df_secu, aes(x = grav, fill = secu1)) +
+#   geom_bar(position = "fill") +
+#   scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
+#                                "#D55E00", "#CC79A7", "#999999", "#000000" ,"#570B66", "#382B53")) +
+#   labs(title = "Lien entre l'équipement de sécurité et la gravité de l'accident",
+#        x = "Gravité de l'accident", y = "Proportion") +
+#   theme_classic() +
+#   scale_y_continuous(trans = "log")
+
+# Créer un dataframe avec les données de secu1
+df_secu1 <- data.frame(table(df_secu$secu1))
+
+ggplot(df_secu, aes(x = grav, fill = secu1)) +
+  geom_bar()
+
+
+
+```
+
+
   
 - Pour les véhicules : 
-      - on regarde la gravité en fonction du type de véhicule (deux roues, voitures classiques etc...)
+      
       - On regarde la gravité en fonction de la sécurité installée pour l'usager (ceinture airbag pour les voitures, casque gant veste pour les motards)
 
 - Pour l'environnement : 
       - On regarde la gravité en fonction de la vitesse autorisée (en agglo (50km/h)n etc...)
       - On regarde le nb et la gravité en fonction de l'état de la route (mouillée, eneigée, sèche)
       - On regarde le nb et la gravité en fonction de l'éclairage de la route (nuit noire, jour, éclairage urbain etc...)
+      
+```{r echo=FALSE, warning=FALSE}
+d <- df %>% filter(age > 13, catu == 1)
+
+sub_df <- d[, c("grav", "lum")]
+
+# enleve les na
+sub_df <- na.omit(sub_df) %>% filter(lum != -1)
+
+tab <- table(sub_df$lum, sub_df$grav)
+
+# Conversion de la table croisée en un data frame
+df_s <- as.data.frame.matrix(tab)
+df_s$lum <- rownames(df_s)
+
+# Mise en forme des données pour un diagramme en barres empilées
+df_long <- tidyr::gather(df_s, key = "grav", value = "count", -lum)
+df_long$grav <- factor(df_long$grav, levels = c("1", "2", "3", "4"))
+df_long$sexe <- factor(df_long$lum, levels = c("1", "2", "3", "4", "5"))
+
+# Convertir la variable grav en factor avec les niveaux correspondants
+df_long$grav <- factor(df_long$grav, levels = 1:4,
+                       labels = c("Indemne", "Mort", "Blessé hospitalisé", "Blessé léger"))
+
+df_long$lum <- factor(df_long$sexe, levels = 1:2:3:4:5,
+                    labels = c("Plein jour", 
+                            "Crépuscule ou aube",
+                            "Nuit sans éclairage public",
+                            "Nuit avec éclairage public non allumé",
+                            "Nuit avec éclairage public allumé"))
+
+# Définir les couleurs personnalisées
+colors <- c("Plein jour"="yellow", 
+        "Crépuscule ou aube"="orange",
+        "Nuit sans éclairage public"="darkblue",
+        "Nuit avec éclairage public non allumé"="purple",
+        "Nuit avec éclairage public allumé"="lightblue")
+
+
+# Réorganiser les niveaux de la variable "grav" en fonction de la fréquence
+df_long$grav <- reorder(df_long$grav, desc(df_long$count))
+
+# Créer le graphique
+ggplot(df_long, aes(x = grav, fill = lum)) +
+  geom_col(position = "dodge", aes(y = count), alpha = 0.8) +
+  scale_fill_manual(values = colors, name = "Conditions d'eclairage",
+                    labels = c("Plein jour", 
+                            "Crépuscule ou aube",
+                            "Nuit sans éclairage public",
+                            "Nuit avec éclairage public non allumé",
+                            "Nuit avec éclairage public allumé")) +
+  labs(title = "Gravité des accidents par condition d'eclairage", x = "", y = "Nombre d'accidents") + theme_gray()+
+  coord_flip()
+
+```
+
