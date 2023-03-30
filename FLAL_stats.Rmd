@@ -29,11 +29,11 @@ library(lubridate)
 Dans ce rapport, nous cherchons à expliquer la gravité des accidents en France en 2021. Le jeu de données vient du site data.gouv.fr.
 La question dans ce dossier est : 
 
-### <strong>Quels sont les facteurs importants impactant la gravité des accidents en France en 2021 ?</strong>
+### Quels sont les facteurs importants impactant la gravité des accidents en France en 2021 ?
 
 Dans notre étude, un accident corporel est défini comme un accident survenu sur une voie ouverte à la circulation publique, impliquant au moins un véhicule et ayant fait au moins une victime ayant nécessité des soins. Cette définition prend en compte tous les accidents qui ont des conséquences physiques pour les personnes impliquées, qu'il s'agisse de blessures mineures ou de décès, ce qui nous permettra d'analyser les facteurs de risque des accidents de la route.
 
-## Netoyyage et représentation du jeu de données
+## Netoyage et représentation du jeu de données
 En ce qui concerne la représentation des données nous avons choisi de représenter toutes les données dans une grande dataframe dont on récupérera les colonnes necessaires pour les différents facteurs. 
 
 Pour nettoyer notre jeu de données, nous avons d'abord examiné les valeurs manquantes, les doublons et les valeurs aberrantes. Par la suite nous avons enlevé les lignes de la dataframe sans données dans lesquelles les colonnes étaient remplies de -1. Nous avons aussi créé une nouvelle variable "region" en fonction de la valeur de la variable "dep", qui correspond à un code départemental.Après ce processus, nous avons constaté qu'environ 0,04 % des lignes ont été éliminées en raison de valeurs manquantes ou de doublons.
