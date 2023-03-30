@@ -537,14 +537,50 @@ ggplot(df_secu, aes(x = grav, fill = secu1)) +
   geom_bar()
 
 
-table(df_secu$grav, df_secu$secu1)
+
+
+# Création de la table de contingence
+tab <- table(df_secu$grav, df_secu$secu1)
+
+# Ajout des marges
+tab_marg <- addmargins(tab)
+
+# Arrondi des valeurs de la table à deux décimales
+tab_marg <- round(tab_marg, 2)
+
+# Formatage de la table sous forme de tableau
+# tab_marg_format <- format(tab_marg, nsmall = 2, justify = "right")
+# colnames(tab_marg_format) <- c("Secu 1", "Total")
+# rownames(tab_marg_format) <- c("Indemne", "Tué", "Blessé hospitalisé", "Blessé léger", "Total")
+
 ```
 
 On constate que, parmis les accidents de la route de notre jeu de données, une grande majorité a un équipement de sécurité équipé tel que la ceinture ou un casque pour les 2 roues.
 
 
+```{r}
+# Créer le tableau de fréquences conditionnelles entre grav et secu1
+freq_table <- prop.table(table(df_secu$grav, df_secu$secu1), margin = 1) * 100
+
+# Ajouter des totaux de colonne et de ligne
+# freq_table <- addmargins(freq_table, margin = 1)
+# freq_table <- addmargins(freq_table, margin = 2)
+
+# Afficher le tableau de fréquences conditionnelles avec les totaux
+freq_table
 
 
+```
+
+Dans les faits, 79.8% des accidents où les passagers ont porté une ceinture de sécurité, ils sont sortis indemnes.
+
+On peut tirer plusieurs conclusions de ce tableau, par exemple :
+
+- Dans l'ensemble des accidents, la majorité des passagers portent une ceinture de sécurité.
+- Les passagers qui ne portent aucun équipement de sécurité ont un risque accru d'être gravement blessés ou tués dans un accident.
+- Le port du casque est associé à une gravité plus élevée des accidents, probablement en raison du fait que les accidents où le casque est porté sont principalement des accidents de moto.
+- Les passagers qui portent un gilet réfléchissant ou un dispositif pour enfants ont des taux de mortalité et de blessures graves relativement faibles.
+- Les valeurs "Non déterminable" et "Non renseigné" pour l'équipement de sécurité sont relativement élevées, ce qui peut indiquer des lacunes dans la collecte de données ou des erreurs dans la déclaration des équipements de sécurité portés.
   
 
       - On regarde le nb et la gravité en fonction de l'état de la route (mouillée, eneigée, sèche)
