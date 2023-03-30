@@ -475,8 +475,10 @@ ggplot(df_secu, aes(x = grav, fill = secu1)) +
   geom_bar()
 
 
-
+table(df_secu$grav, df_secu$secu1)
 ```
+
+On constate que, parmis les accidents de la route de notre jeu de données, une grande majorité a un équipement de sécurité équipé tel que la ceinture ou un casque pour les 2 roues.
 
 
 
@@ -485,6 +487,8 @@ ggplot(df_secu, aes(x = grav, fill = secu1)) +
 
       - On regarde le nb et la gravité en fonction de l'état de la route (mouillée, eneigée, sèche)
       - On regarde le nb et la gravité en fonction de l'éclairage de la route (nuit noire, jour, éclairage urbain etc...)
+      
+### Est ce que la luminosité influence la gravité des accidents ?
       
 ```{r echo=FALSE, warning=FALSE}
 d <- df %>% filter(age > 13, catu == 1)
@@ -541,3 +545,11 @@ ggplot(df_long, aes(x = grav, fill = lum)) +
 
 ```
 
+#### On effectue un test du Chi² pour tester la corrélation entre la gravité et l'état de la route
+
+```{r echo=FALSE, warning=FALSE}
+chisq.test(df$grav, df$surf)
+
+```
+
+La p-value élevée de 1 indique que l'hypothèse nulle, selon laquelle il n'y a pas de corrélation entre les deux variables, ne peut être rejetée. Autrement dit, il n'y a pas de preuve statistique pour affirmer qu'il y a une corrélation significative entre la gravité des blessures (variable "grav") et l'état de la surface (variable "surf") dans les accidents de la route en France en 2021.
