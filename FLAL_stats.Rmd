@@ -134,6 +134,68 @@ Sur 126086 accidents de la route en 2021, 50 % des conducteurs ont moins de 57 a
 
 Dans ce cas, l'intervalle de confiance est [49.7,64.3], ce qui signifie que l'on peut être raisonnablement sûr que la moyenne de l'âge dans la population dont l'échantillon a été prélevé se trouve dans cette plage avec une probabilité de 95%.
 
+```{r echo=FALSE, warning=FALSE}
+# Sous-ensemble de données contenant l'âge et la gravité d'accidents pour chaque âge
+sub_df <- df %>% filter(place == 1, catu == 1, age > 13, grav == 1) %>%
+  group_by(age) %>% 
+  summarise(grav = n()) %>% 
+  filter(!is.na(age))
+# Créer un boxplot avec le nombre d'accidents sur l'axe x et l'âge sur l'axe y
+ggplot(sub_df, aes(x = grav, y = age)) +
+  geom_boxplot() +
+  ylab("Âge du conducteur") +
+  xlab("Nombre d'accidents") +
+  coord_flip() + ggtitle("Boxplot sur l'âge des conducteurs/conductrices indemnes")
+# Afficher les statistiques du boxplot
+print(boxplot.stats(sub_df$age))
+```
+```{r echo=FALSE, warning=FALSE}
+# Sous-ensemble de données contenant l'âge et la gravité d'accidents pour chaque âge
+sub_df <- df %>% filter(place == 1, catu == 1, age > 13, grav == 2) %>%
+  group_by(age) %>% 
+  summarise(grav = n()) %>% 
+  filter(!is.na(age))
+# Créer un boxplot avec le nombre d'accidents sur l'axe x et l'âge sur l'axe y
+ggplot(sub_df, aes(x = grav, y = age)) +
+  geom_boxplot() +
+  ylab("Âge du conducteur") +
+  xlab("Nombre d'accidents") +
+  coord_flip() + ggtitle("Boxplot sur l'âge des conducteurs/conductrices tués")
+# Afficher les statistiques du boxplot
+print(boxplot.stats(sub_df$age))
+```
+```{r echo=FALSE, warning=FALSE}
+# Sous-ensemble de données contenant l'âge et la gravité d'accidents pour chaque âge
+sub_df <- df %>% filter(place == 1, catu == 1, age > 13, grav == 3) %>%
+  group_by(age) %>% 
+  summarise(grav = n()) %>% 
+  filter(!is.na(age))
+# Créer un boxplot avec le nombre d'accidents sur l'axe x et l'âge sur l'axe y
+ggplot(sub_df, aes(x = grav, y = age)) +
+  geom_boxplot() +
+  ylab("Âge du conducteur") +
+  xlab("Nombre d'accidents") +
+  coord_flip() + ggtitle("Boxplot sur l'âge des conducteurs/conductrices blessés hospitalisés")
+# Afficher les statistiques du boxplot
+print(boxplot.stats(sub_df$age))
+```
+```{r echo=FALSE, warning=FALSE}
+# Sous-ensemble de données contenant l'âge et la gravité d'accidents pour chaque âge
+sub_df <- df %>% filter(place == 1, catu == 1, age > 13, grav == 4) %>%
+  group_by(age) %>% 
+  summarise(grav = n()) %>% 
+  filter(!is.na(age))
+# Créer un boxplot avec le nombre d'accidents sur l'axe x et l'âge sur l'axe y
+ggplot(sub_df, aes(x = grav, y = age)) +
+  geom_boxplot() +
+  ylab("Âge du conducteur") +
+  xlab("Nombre d'accidents") +
+  coord_flip() + ggtitle("Boxplot sur l'âge des conducteurs/conductrices blessés légers")
+# Afficher les statistiques du boxplot
+print(boxplot.stats(sub_df$age))
+```
+
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ## remettre dans l'ordre les chiffres de grav
