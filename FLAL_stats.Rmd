@@ -566,7 +566,7 @@ tab_marg <- round(tab_marg, 2)
 On constate que, parmis les accidents de la route de notre jeu de données, une grande majorité a un équipement de sécurité équipé tel que la ceinture ou un casque pour les 2 roues.
 
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 # Créer le tableau de fréquences conditionnelles entre grav et secu1
 freq_table <- prop.table(table(df_secu$grav, df_secu$secu1), margin = 1) * 100
 
