@@ -3,13 +3,15 @@ title: Analyse des accidents de la route pendant l'année 2021 en fonction du li
   de la période, de l'age et du sexe
 author: "Groupe FLAL"
 output:
-  html_document:
-    toc: yes
-    toc_depth: 2
   pdf_document:
     toc: yes
     toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: 2
 ---
+
+Sources de nos jeux de données : https://www.data.gouv.fr/fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2021/
 
 ##### Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine
 
@@ -24,6 +26,16 @@ library(maps)
 library(sf)
 library(lubridate)
 ```
+
+
+
+
+
+\newpage !!!!! A faire !!!!! : 
+\newline - Télécharger le dossier "data" dans le même répertoire que les fichiers FLAL_stats.rmd et data.rmd
+\newline  - Run le fichier data.rmd 
+\newline  - Knit le fichier FLAL_stats.rmd en PDF 
+
 
 
 Contexte : En France en 2021, le début d'année est accompagné d'un confinement, il est interéssant de voir quels sont les chiffres à propos des accidents mais aussi, pour une étude plus globale de prévention, savoir quels sont les facteurs qui influencent la gravité des accidents.

@@ -1,0 +1,14 @@
+\contentsline {subparagraph}{Alex Delagrange, Léo Bouvier, Lucas Giry, Farah Seifeddine}{1}{section*.2}%
+\contentsline {subsubsection}{Quelques éléments nécessaires à la compréhension :}{2}{section*.3}%
+\contentsline {subsection}{Nettoyage et représentation du jeu de données}{2}{section*.4}%
+\contentsline {subsection}{Etude globale sur les accidents en 2021 en France}{3}{section*.5}%
+\contentsline {subsection}{Est ce que les usagers influencent la gravité des accidents ?}{4}{section*.6}%
+\contentsline {subsubsection}{Commençons par étudier si l'âge du conducteur est en corrélation avec la gravité de l'accident}{4}{section*.7}%
+\contentsline {subsubsection}{Est-ce que le sexe influence la gravité des accidents ?}{11}{section*.8}%
+\contentsline {subsection}{Est ce que le lieu influence la gravité des accidents ?}{12}{section*.9}%
+\contentsline {subsection}{Est ce que l'environnement influence la gravité des accidents ?}{17}{section*.10}%
+\contentsline {subsubsection}{Est ce que la catégorie de véhicule influence la gravité ?}{17}{section*.11}%
+\contentsline {subsubsection}{Est ce que l'équipement de sécurité influence la gravité ?}{18}{section*.12}%
+\contentsline {subsubsection}{Est ce que la luminosité influence la gravité des accidents ?}{20}{section*.13}%
+\contentsline {paragraph}{On effectue un test du Chi² pour tester la corrélation entre la gravité et l'état de la route}{20}{section*.14}%
+\contentsline {subsection}{Conclusion}{20}{section*.15}%
